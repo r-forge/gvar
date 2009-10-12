@@ -1,0 +1,81 @@
+<html><head><title>Estimates of critical values of the limiting distributions of the cointegrating rank statistics in a VECM with weakly exogenous I(1) variables</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>cv.tables.pesaran(GVAR)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   CV.trace.table">
+<param name="keyword" value="R:   CV.maxeigen.table">
+<param name="keyword" value=" Estimates of critical values of the limiting distributions of the cointegrating rank statistics in a VECM with weakly exogenous I(1) variables">
+</object>
+
+
+<h2>Estimates of critical values of the limiting distributions of the cointegrating rank statistics in a VECM with weakly exogenous I(1) variables</h2>
+
+
+<h3>Description</h3>
+
+<p>
+These data sets provide estimated critical values for the limiting distributions of the cointegrating rank trace (<code>CV.trace.table</code>) and maximum eigenvalue (<code>CV.maxeigen.table</code>) statistics for all five intercept/trend scenarios (case I to V) as describe in PSS 2000.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>data(cv.tables.pesaran)</pre>
+
+
+<h3>Format</h3>
+
+<p>
+The format is:
+Lists of 10
+$ case I 5
+$ case I 10
+$ case II 5
+$ case II 10
+$ case III 5
+$ case III 10
+$ case IV 5
+$ case IV 10
+$ case V 5
+$ case V 10
+</p>
+
+
+<h3>Details</h3>
+
+<p>
+details to follow
+</p>
+
+
+<h3>Source</h3>
+
+<p>
+M. Hashem Pesaran, Yongcheol Shin, and Richard J. Smith.
+Structural analysis of vector error correction models with exogenous I(1) variables.
+<EM>Journal of Econometrics</EM>, 97:293-343, 2000.
+</p>
+<p>
+James G. MacKinnon, Alfred A. Haug and Leo Michelis.
+Numerical Distribution Functions of Likelihood Ratio Tests for Cointegration.
+<EM>Journal of Applied Econometrics</EM>, 5(14):563-577, 1999.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+data(cv.tables.pesaran)
+
+CV.trace.table[[1]][12,1]         ## returns the 0.05 trace CV for case I in a ... model
+CV.maxeigen.table[[4]][12,1]      ## returns the 0.1 maximum eigenvalue CV for case II in a ... model
+</pre>
+
+
+
+<hr><div align="center">[Package <em>GVAR</em> version 0.1 <a href="00Index.html">Index]</a></div>
+
+</body></html>

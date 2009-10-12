@@ -1,0 +1,71 @@
+<html><head><title>Unit Root Tests</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>ur.tests(GVAR)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   ur.tests">
+<param name="keyword" value=" Unit Root Tests">
+</object>
+
+
+<h2>Unit Root Tests</h2>
+
+
+<h3>Description</h3>
+
+<p>
+<code>ur.tests</code> computes the three different unit root test statistics, Augmented Dickey-Fuller Test, Phillips-Perron Unit Root Test and Kwiatkowski-Phillips-Schmidt-Shin (KPSS) Test, from <span class="pkg">tseries</span> for a data matrix.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+ur.tests(X)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>X</code></td>
+<td>
+a (time series) data matrix</td></tr>
+</table>
+
+<h3>Value</h3>
+
+<p>
+Returns a matrix giving the alternative hypothesis of the tests and the p-values for each variable.</p>
+
+<h3>Author(s)</h3>
+
+<p>
+Martin Summer, Klaus Rheinberger, Rainer Puhr
+</p>
+
+
+<h3>References</h3>
+
+<p>
+see package <span class="pkg">tseries</span>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+X &lt;- ts(cbind(rnorm(100),rnorm(100),rnorm(100)),start=1980,freq=4)
+ur.tests(X)
+
+data(RDp)
+ur.tests(RDp)
+</pre>
+
+
+
+<hr><div align="center">[Package <em>GVAR</em> version 0.1 <a href="00Index.html">Index]</a></div>
+
+</body></html>

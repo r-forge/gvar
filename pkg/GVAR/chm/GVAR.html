@@ -1,0 +1,177 @@
+<html><head><title>Global Vector Auto-Regressive Modelling</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>GVAR(GVAR)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   GVAR">
+<param name="keyword" value=" Global Vector Auto-Regressive Modelling">
+</object>
+
+
+<h2>Global Vector Auto-Regressive Modelling</h2>
+
+
+<h3>Description</h3>
+
+<p>
+<code>GVAR</code> computes VECMs for all regions and stacks the models to a Global Vector Autoregressive Model
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+GVAR(data, tw = NULL, p, q = p, r = NULL, weight, case, exo.var = FALSE,
+     d = NULL, endo = NULL, ord = NULL, we = NULL, method = "max.eigen")
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>data</code></td>
+<td>
+timeseries data as list (each entry is a matrix of a subsystem of variables, if <code>exo.var=TRUE</code> the last entry are exogeneous variables)</td></tr>
+<tr valign="top"><td><code>tw</code></td>
+<td>
+time window, vector of start and end point, if <code>NULL</code> the maximum time interval will be used</td></tr>
+<tr valign="top"><td><code>p</code></td>
+<td>
+scalar/vector of endogenous lags, if a scalar is provided the same lag length is used for all subsystems</td></tr>
+<tr valign="top"><td><code>q</code></td>
+<td>
+scalar/vector of (weakly) exogeneous lags, if a scalar is provided the same lag length is used for all subsystems</td></tr>
+<tr valign="top"><td><code>r</code></td>
+<td>
+scalar/vector of cointegrating relations, if a scalar is provided the same cointegration rank is used for all subsystems, if set to <code>NULL</code> the cointegration rank will be determind by <code>method</code></td></tr>
+<tr valign="top"><td><code>weight</code></td>
+<td>
+weight matrix, the diagonal elements need to be zero</td></tr>
+<tr valign="top"><td><code>case</code></td>
+<td>
+single value/vector of cases (<code>"I"</code> to <code>"V")</code>, where case <code>"I"</code> is a zero intercept, zero trend model, case <code>"II"</code> is a restricted intercept, zero trend model, <code>"III"</code> is a unrestricted intercept, zero trend model, <code>"IV"</code> is a unrestricted intercept restricted trend model and <code>"V"</code> is a unrestricted intercept, unrestricted trend model; if a single value is provided the same structure is used for all subsystems</td></tr>
+<tr valign="top"><td><code>exo.var</code></td>
+<td>
+if <code>TRUE</code> strictly exogeneous variables are included in the model</td></tr>
+<tr valign="top"><td><code>d</code></td>
+<td>
+list showing which strictly exogeneous variables enter the subsystem equations, if <code>NULL</code> all variables in the last entry of <code>data</code> will be used for all subsystems</td></tr>
+<tr valign="top"><td><code>endo</code></td>
+<td>
+list of endogenous variables used in each subsystem, if <code>NULL</code> all variables in <code>data</code> will be used</td></tr>
+<tr valign="top"><td><code>ord</code></td>
+<td>
+vector used if variables in the different subsystem don't appear in the same order, order of each subsystem is concatenated to one vector, if <code>NULL</code> the variables in <code>data</code> are assumed to be ordered identically in all subsystems</td></tr>
+<tr valign="top"><td><code>we</code></td>
+<td>
+list with numbers of weakly exogeneous variables included in each VECM, corresponds to numbers in <code>ord</code>, if <code>NULL</code> every variable appearing in all subsystems will be used</td></tr>
+<tr valign="top"><td><code>method</code></td>
+<td>
+select cointegrating rank by max. eigenvalue (<code>"max.eigen"</code>) or trace statistic (<code>"trace"</code>)</td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+The function computes a VECM for every subsystem before stacking the results to a GVAR model.
+</p>
+<p>
+Specification of input here.
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+An object of class <code>"GVAR"</code> containing the following items:
+</p>
+<table summary="R argblock">
+<tr valign="top"><td><code>subsys</code></td>
+<td>
+subsystem names</td></tr>
+<tr valign="top"><td><code>G</code></td>
+<td>
+multiplier matrix for the current variables</td></tr>
+<tr valign="top"><td><code>H</code></td>
+<td>
+multiplier matrix for the lagged variables</td></tr>
+<tr valign="top"><td><code>Upsilon.0</code></td>
+<td>
+multiplier matrix for the current strictly exogenous variables</td></tr>
+<tr valign="top"><td><code>Upsilon</code></td>
+<td>
+multiplier matrix for the lagged strictly exogenous variables</td></tr>
+<tr valign="top"><td><code>c.0</code></td>
+<td>
+multiplier matrix for the intercept</td></tr>
+<tr valign="top"><td><code>c.1</code></td>
+<td>
+multiplier matrix for the trend</td></tr>
+<tr valign="top"><td><code>we.vecms</code></td>
+<td>
+VECMs of the subsystems</td></tr>
+<tr valign="top"><td><code>m</code></td>
+<td>
+total variables in the subsystems</td></tr>
+<tr valign="top"><td><code>n</code></td>
+<td>
+endogenous variables in the subsystems</td></tr>
+<tr valign="top"><td><code>p</code></td>
+<td>
+endogenous lags in the subsystems</td></tr>
+<tr valign="top"><td><code>q</code></td>
+<td>
+(weakly) exogenous lags in the subsystems</td></tr>
+<tr valign="top"><td><code>r</code></td>
+<td>
+cointegration rank in the subsystems</td></tr>
+<tr valign="top"><td><code>weight</code></td>
+<td>
+weight matrix used to calculate the weakly exogenous variables</td></tr>
+<tr valign="top"><td><code>U</code></td>
+<td>
+residuals of the GVAR</td></tr>
+<tr valign="top"><td><code>U.cov</code></td>
+<td>
+residual covariance matrix</td></tr>
+</table>
+
+<h3>Author(s)</h3>
+
+<p>
+Martin Summer, Klaus Rheinberger, Rainer Puhr
+</p>
+
+
+<h3>References</h3>
+
+<p>
+Stephane Dees, Filippo di Mauro, Hashem Pesaran, and L. Vanessa Smith.
+Exploring the international linkages of the Euro area: A global VAR analysis.
+<EM>Journal of applied Econometrics</EM>, 22(1), 2007.
+</p>
+<p>
+Soeren Johansen.
+<EM>Likelihood-Based Inference in Cointegrated Vector Auto-Regressive Models.</EM>
+Advanced Texts in Econometrics. Oxford University Press, 1995.
+</p>
+<p>
+M. Hashem Pesaran, Yongcheol Shin, and Richard J. Smith.
+Structural analysis of vector error correction models with exogenous I(1) variables.
+<EM>Journal of Econometrics</EM>, 97:293-343, 2000.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+<code><a href="est.we.mdls.html">est.we.mdls</a></code>
+</p>
+
+
+
+<hr><div align="center">[Package <em>GVAR</em> version 0.1 <a href="00Index.html">Index]</a></div>
+
+</body></html>

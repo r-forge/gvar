@@ -1,0 +1,260 @@
+<html><head><title>~~function to do ... ~~</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>summary.vecm(GVAR)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   summary.vecm">
+<param name="keyword" value=" ~~function to do ... ~~">
+</object>
+
+
+<h2>~~function to do ... ~~</h2>
+
+
+<h3>Description</h3>
+
+<p>
+~~ A concise (1-5 lines) description of what the function does. ~~
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+summary.vecm(object, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>object</code></td>
+<td>
+~~Describe <code>object</code> here~~ </td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+~~Describe <code>...</code> here~~ </td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+~~ If necessary, more details than the description above ~~
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+~Describe the value returned
+If it is a LIST, use
+</p>
+<table summary="R argblock">
+<tr valign="top"><td><code>comp1 </code></td>
+<td>
+Description of 'comp1'</td></tr>
+<tr valign="top"><td><code>comp2 </code></td>
+<td>
+Description of 'comp2'</td></tr>
+</table>
+<p>
+
+...</p>
+
+<h3>Warning</h3>
+
+<p>
+....
+</p>
+
+
+<h3>Note</h3>
+
+<p>
+~~further notes~~ 
+</p>
+<p>
+~Make other sections like Warning with section{Warning }{....} ~
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>
+~~who you are~~
+</p>
+
+
+<h3>References</h3>
+
+<p>
+~put references to the literature/web site here ~
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+~~objects to See Also as <code><a onclick="findlink('utils', 'help.html')" style="text-decoration: underline; color: blue; cursor: hand">help</a></code>, ~~~
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--    or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (object, ...) 
+{
+    if (object[["type"]] == "pure VECM") {
+        roundto &lt;- 5
+        alpha &lt;- round(object$alpha, roundto)
+        beta &lt;- round(object$beta, roundto)
+        rownames(beta) &lt;- colnames(object$dat)
+        colnames(beta) &lt;- paste(1:object$r, ".:   ", sep = "")
+        Beta &lt;- NULL
+        Gamma &lt;- object$Gamma
+        const &lt;- cbind(object$mu0, object$mu1)
+        nam &lt;- vector()
+        if (!is.null(object$mu0)) {
+            nam &lt;- c(nam, "         Const")
+        }
+        if (!is.null(object$mu1)) {
+            nam &lt;- c(nam, "Trend")
+        }
+        if (!is.null(const)) {
+            const &lt;- round(const, roundto)
+            colnames(const) &lt;- nam
+        }
+        if (!is.null(object$season)) {
+            Phi &lt;- round(object$Phi, roundto)
+            nam &lt;- "            s1"
+            if (object$season &gt; 1) {
+                nam &lt;- c(nam, paste("s", 2:(object$season - 1), 
+                  sep = ""))
+            }
+            colnames(Phi) &lt;- nam
+        }
+        cat("\nTime series information:\n")
+        cat("Cointegration Rank: ", object$r, "\t\tLag Order: ", 
+            object$p, "\n")
+        cat("\n")
+        cat("Coefficients:\n")
+        cat("Beta:\n")
+        print(t(beta))
+        cat("\n")
+        cat("Alpha:\n")
+        print(alpha)
+        cat("\n")
+        if (object$p &gt; 1) {
+            Gammer &lt;- NULL
+            seG &lt;- NULL
+            tvalsG &lt;- NULL
+            pvalsG &lt;- NULL
+            cat("Gamma:\n")
+            for (i in 1:length(object$Gamma)) {
+                colnames(Gamma[[i]])[1] &lt;- paste("        ", 
+                  colnames(Gamma[[i]])[1])
+                Gammer &lt;- cbind(Gammer, round(Gamma[[i]], roundto))
+                seG &lt;- cbind(seG, round(object$se$Gamma[[i]], 
+                  roundto))
+                tvalsG &lt;- cbind(tvalsG, round(object$tvals$Gamma[[i]], 
+                  roundto))
+                pvlasG &lt;- cbind(pvalsG, round(object$pvals$Gamma[[i]], 
+                  roundto))
+            }
+            for (i in 1:object$n) {
+                seTemp &lt;- NULL
+                tvalTemp &lt;- NULL
+                for (j in 1:length(Gammer[i, ])) {
+                  seTemp &lt;- c(seTemp, paste("(", round(seG[i, 
+                    j], 3), ")", sep = ""))
+                  tvalTemp &lt;- c(tvalTemp, paste("[", round(tvalsG[i, 
+                    j], 2), "]", sep = ""))
+                }
+                GAMMA &lt;- rbind(Gammer[i, ], seTemp, tvalTemp)
+                rownames(GAMMA) &lt;- c(rownames(Gammer)[i], "(Std.Err.)", 
+                  "[t-Value]")
+                print(as.data.frame(GAMMA))
+            }
+            cat("\n")
+        }
+        if (!is.null(object$mu0) || !is.null(object$mu1)) {
+            cat("Intercept (and Trend) in VAR:\n")
+            if (object$case == "V") {
+                seC &lt;- cbind(object$se$mu0, object$se$mu1)
+                tvalC &lt;- cbind(object$se$mu0, object$se$mu1)
+                pvalC &lt;- cbind(object$se$mu0, object$se$mu1)
+            }
+            else if (object$case == "IV" || object$case == "H_1(r)") {
+                seC &lt;- cbind(object$se$mu0)
+                tvalC &lt;- cbind(object$se$mu0)
+                pvalC &lt;- cbind(object$se$mu0)
+            }
+            else {
+                seC &lt;- NULL
+                tvalC &lt;- NULL
+                pvalC &lt;- NULL
+            }
+            for (i in 1:object$n) {
+                seTemp &lt;- NULL
+                tvalTemp &lt;- NULL
+                for (j in 1:dim(const)[2]) {
+                  seTemp &lt;- c(seTemp, paste("(", round(seC[i, 
+                    j], 3), ")", sep = ""))
+                  tvalTemp &lt;- c(tvalTemp, paste("[", round(tvalC[i, 
+                    j], 2), "]", sep = ""))
+                }
+                CONST &lt;- rbind(const[i, ], seTemp, tvalTemp)
+                rownames(CONST) &lt;- c(rownames(const)[i], "(Std.Err.)", 
+                  "[t-Value]")
+                colnames(CONST) &lt;- colnames(const)
+                print(as.data.frame(CONST))
+            }
+            cat("\n")
+        }
+        if (!is.null(object$season)) {
+            cat("Seasonality:\n")
+            for (i in 1:object$n) {
+                seTemp &lt;- NULL
+                tvalTemp &lt;- NULL
+                for (j in 1:(object$season - 1)) {
+                  seTemp &lt;- c(seTemp, paste("(", round(object$se$season[i, 
+                    j], 3), ")", sep = ""))
+                  tvalTemp &lt;- c(tvalTemp, paste("[", round(object$tvals$season[i, 
+                    j], 2), "]", sep = ""))
+                }
+                SEASON &lt;- rbind(Phi[i, ], seTemp, tvalTemp)
+                rownames(SEASON) &lt;- c(rownames(object$se$season)[i], 
+                  "(Std.Err.)", "[t-Value]")
+                colnames(SEASON) &lt;- colnames(Phi)
+                print(as.data.frame(SEASON))
+            }
+            cat("\n")
+        }
+        cat("\n")
+    }
+    else if (object[["type"]] == "weakly exogenous VECM") {
+    }
+  }
+</pre>
+
+<script Language="JScript">
+function findlink(pkg, fn) {
+var Y, link;
+Y = location.href.lastIndexOf("\\") + 1;
+link = location.href.substring(0, Y);
+link = link + "../../" + pkg + "/chtml/" + pkg + ".chm::/" + fn;
+location.href = link;
+}
+</script>
+
+
+<hr><div align="center">[Package <em>GVAR</em> version 0.1 <a href="00Index.html">Index]</a></div>
+
+</body></html>

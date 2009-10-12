@@ -1,0 +1,124 @@
+<html><head><title>Test for Cointegrating Rank in Vector Error Correction Models</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>rank.test.vecm(GVAR)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   rank.test.vecm">
+<param name="keyword" value="R:   rank.test.we">
+<param name="keyword" value=" Test for Cointegrating Rank in Vector Error Correction Models">
+</object>
+
+
+<h2>Test for Cointegrating Rank in Vector Error Correction Models</h2>
+
+
+<h3>Description</h3>
+
+<p>
+<code>rank.test.vecm</code> performs a test for cointegrating rank in VEC models
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+rank.test.vecm(Y.ts, etw, p, case, season = NULL, season.start.time = NULL)
+
+rank.test.we(z.ts, etw, p, q = p, n, case)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>Y.ts,z.ts</code></td>
+<td>
+time series data matrix</td></tr>
+<tr valign="top"><td><code>etw</code></td>
+<td>
+estimation time window, a list of the form <code>list(start=,end=,freq=)</code></td></tr>
+<tr valign="top"><td><code>p</code></td>
+<td>
+lag order of the endogenous variables</td></tr>
+<tr valign="top"><td><code>q</code></td>
+<td>
+lag order of the (weakly) exogenous variables, is set to <code>q=p</code> by default</td></tr>
+<tr valign="top"><td><code>n</code></td>
+<td>
+number of endogenous variables</td></tr>
+<tr valign="top"><td><code>case</code></td>
+<td>
+intercept and trend options from <code>"I"</code> to <code>"V"</code>, where case <code>"I"</code> is a zero intercept, zero trend model, case <code>"II"</code> is a restricted intercept, zero trend model, <code>"III"</code> is a unrestricted intercept, zero trend model, <code>"IV"</code> is a unrestricted intercept restricted trend model and <code>"V"</code> is a unrestricted intercept, unrestricted trend model</td></tr>
+<tr valign="top"><td><code>season</code></td>
+<td>
+optional seasonal dummies, default value is <code>NULL</code></td></tr>
+<tr valign="top"><td><code>season.start.time</code></td>
+<td>
+optional dummy start time, default value is <code>NULL</code></td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+Either use <code>rank.test.vecm</code> or <code>rank.test.we</code> for VECM and VECM with exogenous I(1) variables respectively.
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+Values for maximum eigenvalue and trace statistics are returned as well as critical values for the limit distribution of these test statistics.</p>
+
+<h3>Note</h3>
+
+<p>
+~~further notes~~
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>
+Martin Summer, Klaus Rheinberger, Rainer Puhr
+</p>
+
+
+<h3>References</h3>
+
+<p>
+Soeren Johansen.
+<EM>Likelihood-Based Inference in Cointegrated Vector Auto-Regressive Models.</EM>
+Advanced Texts in Econometrics. Oxford University Press, 1995.
+</p>
+<p>
+Helmut Luetkepohl, Markus Kraetzig.
+<EM>Applied Time Series Econometrics.</EM>
+Cambridge University Press, 2004.
+</p>
+<p>
+M. Hashem Pesaran, Yongcheol Shin, and Richard J. Smith.
+Structural analysis of vector error correction models with exogenous I(1) variables.
+<EM>Journal of Econometrics</EM>, 97:293-343, 2000.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+<code><a href="est.vecm.mdls.html">est.vecm.mdls</a></code>, <code><a href="est.we.mdls.html">est.we.mdls</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+##---- Should be DIRECTLY executable !! ----
+</pre>
+
+
+
+<hr><div align="center">[Package <em>GVAR</em> version 0.1 <a href="00Index.html">Index]</a></div>
+
+</body></html>
