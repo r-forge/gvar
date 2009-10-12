@@ -1,0 +1,194 @@
+<html><head><title>Estimation of Vector Error Correction Models</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" type="text/css" href="Rchm.css">
+</head>
+<body>
+
+<table width="100%"><tr><td>est.vecm.mdls(GVAR)</td><td align="right">R Documentation</td></tr></table><object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="keyword" value="R:   est.vecm.mdls">
+<param name="keyword" value=" Estimation of Vector Error Correction Models">
+</object>
+
+
+<h2>Estimation of Vector Error Correction Models</h2>
+
+
+<h3>Description</h3>
+
+<p>
+<code>est.vecm.mdls</code> will calculate VECMs and provide trace and eigenvalue statistics to determine the cointegration rank of the system
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+est.vecm.mdls(Y.ts, etw, p, case, r, season = NULL, season.start.time = NULL)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>Y.ts</code></td>
+<td>
+a time series data matrix containing the endogenous data</td></tr>
+<tr valign="top"><td><code>etw</code></td>
+<td>
+estimation time window, a list of the form <code>list(start=,end=,freq=)</code></td></tr>
+<tr valign="top"><td><code>p</code></td>
+<td>
+lag order of the endogenous variables</td></tr>
+<tr valign="top"><td><code>case</code></td>
+<td>
+intercept and trend options from <code>"I"</code> to <code>"V"</code>, where case <code>"I"</code> is a zero intercept, zero trend model, case <code>"II"</code> is a restricted intercept, zero trend model, <code>"III"</code> is a unrestricted intercept, zero trend model, <code>"IV"</code> is a unrestricted intercept restricted trend model and <code>"V"</code> is a unrestricted intercept, unrestricted trend model</td></tr>
+<tr valign="top"><td><code>r</code></td>
+<td>
+cointegrating rank used for estimating the model</td></tr>
+<tr valign="top"><td><code>season</code></td>
+<td>
+frequency of optional seasonal dummies, default value is <code>NULL</code> (no seasonal dummies)</td></tr>
+<tr valign="top"><td><code>season.start.time</code></td>
+<td>
+optional dummy start, default value is <code>NULL</code></td></tr>
+</table>
+
+<h3>Details</h3>
+
+<p>
+Calculating VECMs:
+</p>
+
+
+<h3>Value</h3>
+
+<p>
+An object of class <code>"vecm"</code> containing the following items
+</p>
+<table summary="R argblock">
+<tr valign="top"><td><code>type</code></td>
+<td>
+is set to <code>"VECM"</code> by default</td></tr>
+<tr valign="top"><td><code>dat</code></td>
+<td>
+data used for calculating the model</td></tr>
+<tr valign="top"><td><code>freq</code></td>
+<td>
+frequency of the time series used</td></tr>
+<tr valign="top"><td><code>n</code></td>
+<td>
+number of variables entering the model</td></tr>
+<tr valign="top"><td><code>p</code></td>
+<td>
+lag order of the endogenous variables</td></tr>
+<tr valign="top"><td><code>r</code></td>
+<td>
+cointegrating rank used for the model estimation</td></tr>
+<tr valign="top"><td><code>T</code></td>
+<td>
+length of the time series, given without initial values</td></tr>
+<tr valign="top"><td><code>alpha</code></td>
+<td>
+list of model coefficients for the different cointegration ranks, see details</td></tr>
+<tr valign="top"><td><code>beta</code></td>
+<td>
+list of model coefficients for the different cointegration ranks, see details</td></tr>
+<tr valign="top"><td><code>Pi</code></td>
+<td>
+list of model coefficients for the different cointegration ranks, see details</td></tr>
+<tr valign="top"><td><code>Gamma</code></td>
+<td>
+list of model coefficients for the different cointegration ranks, see details</td></tr>
+<tr valign="top"><td><code>case</code></td>
+<td>
+intercept and trend specification from <code>"I"</code> to <code>"V"</code>, see arguments</td></tr>
+<tr valign="top"><td><code>mu.0</code></td>
+<td>
+list of intercepts for the different cointegration ranks, see details</td></tr>
+<tr valign="top"><td><code>mu.1</code></td>
+<td>
+list of trend coefficients for the different cointegration ranks, see details</td></tr>
+<tr valign="top"><td><code>Phi</code></td>
+<td>
+list of model coefficients for the different cointegration ranks, see details</td></tr>
+<tr valign="top"><td><code>Omega</code></td>
+<td>
+list of covariance matrices of the error terms for the different cointegration ranks</td></tr>
+<tr valign="top"><td><code>residuals</code></td>
+<td>
+model residuals</td></tr>
+<tr valign="top"><td><code>S</code></td>
+<td>
+product moment matrices</td></tr>
+<tr valign="top"><td><code>lambda</code></td>
+<td>
+eigenvalues</td></tr>
+<tr valign="top"><td><code>se</code></td>
+<td>
+standard errors of coefficients</td></tr>
+<tr valign="top"><td><code>tvalues</code></td>
+<td>
+t-distributed test statistic of coefficients</td></tr>
+<tr valign="top"><td><code>pvalues</code></td>
+<td>
+p-values for test statistic of coefficients</td></tr>
+</table>
+
+<h3>Note</h3>
+
+<p>
+~~further notes~~
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>
+Martin Summer, Klaus Rheinberger, Rainer Puhr, Michael Sigmund
+</p>
+
+
+<h3>References</h3>
+
+<p>
+Soeren Johansen.
+<EM>Likelihood-Based Inference in Cointegrated Vector Auto-Regressive Models.</EM>
+Advanced Texts in Econometrics. Oxford University Press, 1995.
+</p>
+<p>
+Helmut Luetkepohl, Markus Kraetzig.
+<EM>Applied Time Series Econometrics.</EM>
+Cambridge University Press, 2004.
+</p>
+<p>
+Helmut Luetkepohl.
+<EM>New Introduction to Multiple Time Series Analysis.</EM>
+Springer, 2005.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>
+<code><a href="est.we.mdls.html">est.we.mdls</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+ data(RDp)
+
+    dt &lt;- 1/tsp(RDp)[3]
+     k &lt;- 4
+   etw &lt;- list(start=tsp(RDp)[1]+k*dt,end=tsp(RDp)[2],freq=tsp(RDp)[3])
+
+ model &lt;- est.vecm.mdls(Y.ts=RDp,etw=etw,p=k,r=1,case="III",season=4,season.start.time=1)
+ summary(model)
+</pre>
+
+
+
+<hr><div align="center">[Package <em>GVAR</em> version 0.1 <a href="00Index.html">Index]</a></div>
+
+</body></html>
