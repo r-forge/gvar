@@ -191,7 +191,12 @@ pvals <- new.env()
 
 M <- diag(T)-t(Z2)%*%solve(Z2%*%t(Z2))%*%Z2
 Sigma.u.tilde <- U%*%t(U)/T
-Omega.b <- solve(t(Z1[-(1:r),])%*%M%*%Z1[-(1:r),])%x%solve(t(alpha)%*%solve(Sigma.u.tilde)%*%alpha)
+if (r==1)
+{
+  Omega.b <- solve(t(Z1[-(1:r),])%*%M%*%Z1[-(1:r),])%x%solve(t(alpha)%*%solve(Sigma.u.tilde)%*%alpha)
+} else {
+  Omega.b <- solve(Z1[-(1:r),]%*%M%*%t(Z1[-(1:r),]))%x%solve(t(alpha)%*%solve(Sigma.u.tilde)%*%alpha)
+}
 tvals$beta <- beta[-(1:r),]/sqrt(diag(Omega.b))
 
 # other parameters
