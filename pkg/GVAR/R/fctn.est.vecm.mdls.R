@@ -111,7 +111,10 @@ if (r==0) {
 
 if ((r>0)&(r<n)) {
  beta <- as.matrix(V[,1:r])
- if (1) {beta <- as.matrix(V[,1:r]%*%solve(V[1:r,1:r]))}
+ if (1) {
+ 	beta <- as.matrix(V[,1:r]%*%solve(V[1:r,1:r]),ncol=r)
+ 	rownames(beta) <- rownames(V)
+ 	}
  alpha <- S01%*%beta%*%solve(t(beta)%*%S11%*%beta)
  Pi <- alpha%*%t(beta)
  if (length(Z2)) Psi <- M02%*%M22.inv-Pi%*%M12%*%M22.inv
@@ -135,6 +138,7 @@ Y <- Z0 - Pi%*%Z1
 
 ## compute Gamma_i, mu_t, Phi matrices and vectors for all ranks 0:n 
 
+Gamma <- NULL
 if (p>1) {
  Gamma_ <- list()
  for (i in (1:(p-1)) ) {
@@ -162,17 +166,17 @@ if ( case=="H(r)" && length(Psi) ) {
  }
  if (r>0 & r<n) {
   mu1 <- alpha%*%t(beta)[,n+1]
-  beta <- beta[-(n+1),]
+#  beta <- as.matrix(beta[-(n+1),],ncol=r)
  }
 #   mu1[[paste("rank",r)]]<- alpha[[paste("rank",r)]]%*%beta[[paste("rank",r)]][n+1,]
 #   beta[[paste("rank",r)]]<- beta[[paste("rank",r)]][-(n+1),]
- Pi <- Pi[1:n,1:n]
+# Pi <- Pi[1:n,1:n]
 } else if (case=="H_1^*(r)") {
  if (r>0 & r<n) {
   mu0 <- alpha%*%t(beta)[,n+1]
-  beta <- beta[-(n+1),]
+#  beta <- beta[-(n+1),]
  }
- Pi <- Pi[1:n,1:n]
+# Pi <- Pi[1:n,1:n]
 #   mu0[[paste("rank",r)]]<- alpha[[paste("rank",r)]]%*%beta[[paste("rank",r)]][n+1,]
  if ( length(Psi) ) {
   Phi <- Psi[,-(1:((p-1)*n))]
@@ -193,7 +197,7 @@ M <- diag(T)-t(Z2)%*%solve(Z2%*%t(Z2))%*%Z2
 Sigma.u.tilde <- U%*%t(U)/T
 if (r==1)
 {
-  Omega.b <- solve(t(Z1[-(1:r),])%*%M%*%Z1[-(1:r),])%x%solve(t(alpha)%*%solve(Sigma.u.tilde)%*%alpha)
+  Omega.b <- solve(Z1[-(1:r),]%*%M%*%t(Z1[-(1:r),]))%x%solve(t(alpha)%*%solve(Sigma.u.tilde)%*%alpha)
 } else {
   Omega.b <- solve(Z1[-(1:r),]%*%M%*%t(Z1[-(1:r),]))%x%solve(t(alpha)%*%solve(Sigma.u.tilde)%*%alpha)
 }
