@@ -7,7 +7,6 @@ summary.vecm <- function(object, ...)
     {
       alpha <- round(object$alpha,roundto)
       beta <- round(object$beta,roundto)
-      rownames(beta) <- colnames(object$dat)
       colnames(beta) <- paste(1:object$r,".:   ",sep="")
       Beta <- NULL
     }
@@ -41,12 +40,18 @@ summary.vecm <- function(object, ...)
       for (i in 1:object$r)
       {
         temptB <- rep("-",object$r)
-        seTemp <- rep("-",object$r)
-        for (j in l+(1:(object$n-object$r)))
+        seTemp <- rep("-",object$r)        
+        if (object$case=="H_1^*(r)" || object$case=="H^*(r)")
+        {
+      	  i.b <- object$n-object$r+1
+        } else {
+      	  i.b <- object$n-object$r
+        }
+        for (j in l+(1:i.b))
         {
           temptB <- c(temptB,paste("[",round(tvalsB[j],2),"]",sep=""))        
         }
-        seTemp <- c(seTemp,rep("NA",(object$n-object$r)))
+        seTemp <- c(seTemp,rep("NA",i.b))
 
         BETA <- rbind(beta[,i],seTemp,temptB)
         rownames(BETA) <- c(colnames(beta)[i],"(Std.Err.)","[t-Value]")
@@ -92,15 +97,17 @@ summary.vecm <- function(object, ...)
     if (!is.null(object$mu0) || !is.null(object$mu1))
     { 
       cat("Intercept (and Trend) in VAR:\n")
-      if (object$case=="V")
+      if (object$case=="H(r)")
       {
         seC <- cbind(object$se$mu0,object$se$mu1)
         tvalC <- cbind(object$tvals$mu0,object$tvals$mu1)
         pvalC <- cbind(object$pvals$mu0,object$pvals$mu1)
-      } else if (object$case=="IV" || object$case=="H_1(r)"){
+        n.case <- 2
+      } else if (object$case=="H^*(r)" || object$case=="H_1(r)"){
         seC <- cbind(object$se$mu0)
         tvalC <- cbind(object$tvals$mu0)
         pvalC <- cbind(object$pvals$mu0)
+        n.case <- 1
       } else {
         seC <- NULL
         tvalC <- NULL
@@ -110,11 +117,21 @@ summary.vecm <- function(object, ...)
       {
         seTemp <- NULL
         tvalTemp <- NULL
-        for (j in 1:dim(const)[2])
+        
+        if (object$case!="H_1^*(r)")
         {
-          seTemp <- c(seTemp,paste("(",round(seC[i,j],3),")",sep=""))
-          tvalTemp <- c(tvalTemp,paste("[",round(tvalC[i,j],2),"]",sep=""))
+          for (j in 1:n.case)
+          {
+            seTemp <- c(seTemp,paste("(",round(seC[i,j],3),")",sep=""))
+            tvalTemp <- c(tvalTemp,paste("[",round(tvalC[i,j],2),"]",sep=""))
+          }
         }
+        if (object$case=="H_1^*(r)" || object$case=="H^*(r)")
+        {
+          seTemp <- c(seTemp,"-")
+          tvalTemp <- c(tvalTemp,"-")
+        } 
+        
         CONST <- rbind(const[i,],seTemp,tvalTemp)
         rownames(CONST) <- c(rownames(const)[i],"(Std.Err.)","[t-Value]")
         colnames(CONST) <- colnames(const)
