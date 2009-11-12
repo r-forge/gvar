@@ -7,7 +7,6 @@ if (x[["type"]]=="pure VECM")
     {
       alpha <- round(x$alpha,roundto)
       beta <- round(x$beta,roundto)
-      rownames(beta) <- colnames(x$dat)
       colnames(beta) <- paste(1:x$r,".:   ",sep="")
     }
     Gamma <- x$Gamma
@@ -65,6 +64,9 @@ if (x[["type"]]=="pure VECM")
       cat("\n")
     }
     cat("\n")
+    
+    
+    
   } else if (x[["type"]]=="weakly exogenous VECM") {
     roundto <- 5
     if (!(x$r==x$n))
