@@ -131,7 +131,7 @@ if (r==n) {
 
 ## residuals ############################################################
 
-U <- Z0 - Pi%*%Z1 - Psi%*%Z2
+if (length(Z2)) {U <- Z0 - Pi%*%Z1 - Psi%*%Z2} else {U <- Z0 - Pi%*%Z1}
 
 # this is needed for t-values
 Y <- Z0 - Pi%*%Z1 
@@ -192,8 +192,8 @@ tvals <- new.env()
 pvals <- new.env()
 
 # beta
+if (length(Z2)) {M <- diag(T)-t(Z2)%*%solve(Z2%*%t(Z2))%*%Z2} else {M <- diag(T)}
 
-M <- diag(T)-t(Z2)%*%solve(Z2%*%t(Z2))%*%Z2
 Sigma.u.tilde <- U%*%t(U)/T
 if (r==1)
 {
@@ -204,15 +204,17 @@ if (r==1)
 tvals$beta <- beta[-(1:r),]/sqrt(diag(Omega.b))
 
 # other parameters
+if (length(Z2))
+{
+  res <- lm(t(Y) ~ t(Z2) + 0)
+  weights <- log((res$residuals)^2)
 
-res <- lm(t(Y) ~ t(Z2) + 0)
-weights <- log((res$residuals)^2)
+  res.w <-  lm(weights ~ t(Z2) + 0)  
+  weights.final <- 1/(exp(res.w$fitted.values))
+  weights <- data.frame(weights.final)
 
-res.w <-  lm(weights ~ t(Z2) + 0)
-weights.final <- 1/(exp(res.w$fitted.values))
-weights <- data.frame(weights.final)
-
-res.final <- lm(t(Y) ~ t(Z2) + 0, weights)
+  res.final <- lm(t(Y) ~ t(Z2) + 0, weights)
+}
 
 if (p>1)
 {
