@@ -150,17 +150,17 @@ if (p>1) {
 mu0 <- NULL
 mu1 <- NULL
 
-if ( case=="H(r)" && length(Psi) ) {
+if ( case=="H(r)" && length(Z2) ) {
  mu0 <- Psi[,(p-1)*n+1]
  mu1 <- Psi[,(p-1)*n+2]
  Phi <- Psi[,-(1:((p-1)*n+2))]
-} else if ( case=="H_1(r)" && length(Psi) ) {
+} else if ( case=="H_1(r)" && length(Z2) ) {
  mu0 <- Psi[,(p-1)*n+1]
  Phi <- Psi[,-(1:((p-1)*n+1))]
-} else if ( case=="H_2(r)" && length(Psi) ) {
+} else if ( case=="H_2(r)" && length(Z2) ) {
  Phi <- Psi[,-(1:((p-1)*n))]
 } else if ( case=="H^*(r)" ) {
- if ( length(Psi) ) {
+ if ( length(Z2) ) {
   mu0 <- Psi[,(p-1)*n+1]
   Phi <- Psi[,-(1:((p-1)*n+1))]
  }
@@ -178,7 +178,7 @@ if ( case=="H(r)" && length(Psi) ) {
  }
 # Pi <- Pi[1:n,1:n]
 #   mu0[[paste("rank",r)]]<- alpha[[paste("rank",r)]]%*%beta[[paste("rank",r)]][n+1,]
- if ( length(Psi) ) {
+ if ( length(Z2) ) {
   Phi <- Psi[,-(1:((p-1)*n))]
 #   beta[[paste("rank",r)]]<- beta[[paste("rank",r)]][-(n+1),]
  }
@@ -197,9 +197,9 @@ if (length(Z2)) {M <- diag(T)-t(Z2)%*%solve(Z2%*%t(Z2))%*%Z2} else {M <- diag(T)
 Sigma.u.tilde <- U%*%t(U)/T
 if (r==1)
 {
-  Omega.b <- solve(Z1[-(1:r),]%*%M%*%t(Z1[-(1:r),]))%x%solve(t(alpha)%*%solve(Sigma.u.tilde)%*%alpha)
+  Omega.b <- solve(matrix(Z1[-1,],ncol=T)%*%M%*%t(matrix(Z1[-1,],ncol=T)))%x%solve(t(alpha)%*%solve(Sigma.u.tilde)%*%alpha)
 } else {
-  Omega.b <- solve(Z1[-(1:r),]%*%M%*%t(Z1[-(1:r),]))%x%solve(t(alpha)%*%solve(Sigma.u.tilde)%*%alpha)
+  Omega.b <- solve(matrix(Z1[-(1:r),],ncol=T)%*%M%*%t(matrix(Z1[-(1:r),],ncol=T)))%x%solve(t(alpha)%*%solve(Sigma.u.tilde)%*%alpha)
 }
 tvals$beta <- beta[-(1:r),]/sqrt(diag(Omega.b))
 
