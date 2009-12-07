@@ -149,6 +149,7 @@ if (p>1) {
 
 mu0 <- NULL
 mu1 <- NULL
+Phi <- NULL
 
 if ( case=="H(r)" && length(Z2) ) {
  mu0 <- Psi[,(p-1)*n+1]
@@ -158,7 +159,7 @@ if ( case=="H(r)" && length(Z2) ) {
  mu0 <- Psi[,(p-1)*n+1]
  Phi <- Psi[,-(1:((p-1)*n+1))]
 } else if ( case=="H_2(r)" && length(Z2) ) {
- Phi <- Psi[,-(1:((p-1)*n))]
+	if (p>1) {Phi <- Psi[,-(1:((p-1)*n))]} else {Phi <- Psi}
 } else if ( case=="H^*(r)" ) {
  if ( length(Z2) ) {
   mu0 <- Psi[,(p-1)*n+1]
@@ -171,7 +172,7 @@ if ( case=="H(r)" && length(Z2) ) {
 #   mu1[[paste("rank",r)]]<- alpha[[paste("rank",r)]]%*%beta[[paste("rank",r)]][n+1,]
 #   beta[[paste("rank",r)]]<- beta[[paste("rank",r)]][-(n+1),]
 # Pi <- Pi[1:n,1:n]
-} else if (case=="H_1^*(r)") {
+} else if (case=="H_1^*(r)" && length(Z2)) {
  if (r>0 & r<n) {
   mu0 <- alpha%*%t(beta)[,n+1]
 #  beta <- beta[-(n+1),]
@@ -179,7 +180,8 @@ if ( case=="H(r)" && length(Z2) ) {
 # Pi <- Pi[1:n,1:n]
 #   mu0[[paste("rank",r)]]<- alpha[[paste("rank",r)]]%*%beta[[paste("rank",r)]][n+1,]
  if ( length(Z2) ) {
-  Phi <- Psi[,-(1:((p-1)*n))]
+  if (p>1) {Phi <- Psi[,-(1:((p-1)*n))]} else {Phi <- Psi}
+  
 #   beta[[paste("rank",r)]]<- beta[[paste("rank",r)]][-(n+1),]
  }
 }
@@ -236,9 +238,9 @@ if (p>1)
   }
 }
 
+temp <- 1
 if (case=="H_1(r)" || case=="H^*(r)" || case=="H(r)")
 {
-  temp <- 1 
   se$mu0 <- vector()    
   tvals$mu0 <- vector()
   pvals$mu0 <- vector()                         
