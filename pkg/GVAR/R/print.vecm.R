@@ -73,11 +73,13 @@ if (x[["type"]]=="pure VECM")
     {
       alpha <- round(x$alpha,roundto)
       beta <- round(x$beta,roundto)
-      if (x$case=="II" || x$case=="IV")
+      if (x$case=="II") 
       {
-      	  rownames(beta) <- c(colnames(x$dat[,1:x$m]),rownames(x$beta)[dim(x$beta)[1]])
-      } else {
-    	  rownames(beta) <- colnames(x$dat[,1:x$m])
+         rownames(beta) <- c(colnames(x$dat[,1:x$m]),"Const")
+      } else if (x$case=="IV") {
+         rownames(beta) <- c(colnames(x$dat[,1:x$m]),"Trend")
+      } else {     
+    	    rownames(beta) <- colnames(x$dat[,1:x$m])
       }
       colnames(beta) <- paste(1:x$r,".:   ",sep="")
     }

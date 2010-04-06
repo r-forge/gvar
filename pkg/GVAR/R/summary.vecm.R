@@ -170,11 +170,13 @@ summary.vecm <- function(object, ...)
     {
       alpha <- round(object$alpha,roundto)
       beta <- round(object$beta,roundto)
-      if (object$case=="II" || object$case=="IV")
+      if (object$case=="II") 
       {
-      	  rownames(beta) <- c(colnames(object$dat[,1:object$m]),rownames(object$beta)[dim(object$beta)[1]])
-      } else {
-    	  rownames(beta) <- colnames(object$dat[,1:object$m])
+         rownames(beta) <- c(colnames(object$dat[,1:object$m]),"Const")
+      } else if (object$case=="IV") {
+         rownames(beta) <- c(colnames(object$dat[,1:object$m]),"Trend")
+      } else {     
+    	    rownames(beta) <- colnames(object$dat[,1:object$m])
       }
       colnames(beta) <- paste(1:object$r,".:   ",sep="")
       Beta <- NULL
