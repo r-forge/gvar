@@ -12,7 +12,7 @@ est.we.mdls <- function (z.ts,etw,p,q=p,n,ex=0,lex=NULL,case,r)
 # ok allow for higher AR-lag-order in \Delta x_t: up to \Delta x_{t-q+1}
 {
 ## critical values are taken from [1]:
-source("cv.tables.pesaran.r")
+#source("cv.tables.pesaran.r")
 
 freq<- etw[["freq"]] # time sampling frequency
 dt<- 1/freq # time sampling interval

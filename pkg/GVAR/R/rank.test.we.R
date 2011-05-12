@@ -7,7 +7,8 @@ rank.test.we <- function (z.ts,etw,p,q=p,n,ex,lex,case)
 # \Delta x_t = a_{x0}+\sum_{i=1}^{p-1}\Gamma_{xi}\Delta z_{t-i}+e_{xt}, where e_{xt} is N(0,\Omega_{xx})
 {
 ## critical values are taken from [1]:
-data(cv.tables.pesaran)
+data(CV.maxeigen.table)
+data(CV.trace.table)
 
 freq<- etw[["freq"]] # time sampling frequency
 dt<- 1/freq # time sampling interval

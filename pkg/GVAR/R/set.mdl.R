@@ -49,19 +49,19 @@ if (mdls[["type"]]=="weakly exogenous VECM") {
  }
  # NOTE: k>0 is assumed!
  if (q>1) {
-  B[[1]]<- -mdl$VECM[["Lambda"]][,1:(m-n)]+mdl$VECM[["Pi.y"]][,(n+1):m]+mdl$VECM[["Psi"]][[1]][,1:k]
+  B[[1]]<- as.matrix(-mdl$VECM[["Lambda"]][,1:(m-n)]+mdl$VECM[["Pi.y"]][,(n+1):m]+mdl$VECM[["Psi"]][[1]][,1:k] ,ncol=m-n)
   if (q>2) {
    for (i in 2:(q-1)) {
-    B[[i]]<- mdl$VECM[["Psi"]][[i]][,1:k]-mdl$VECM[["Psi"]][[i-1]][,1:k]
+    B[[i]]<- as.matrix(mdl$VECM[["Psi"]][[i]][,1:k]-mdl$VECM[["Psi"]][[i-1]][,1:k],ncol=m-n)
    }
   }
-  B[[q]]<- -mdl$VECM[["Psi"]][[q-1]][,1:k]
+  B[[q]]<- as.matrix(-mdl$VECM[["Psi"]][[q-1]][,1:k],ncol=m-n)
  } else if (q==1) {
-  B[[1]]<- -mdl$VECM[["Lambda"]][,1:(m-n)]+mdl$VECM[["Pi.y"]][,(n+1):m]
+  B[[1]]<- as.matrix(-mdl$VECM[["Lambda"]][,1:(m-n)]+mdl$VECM[["Pi.y"]][,(n+1):m],ncol=m-n)
  }
  mdl$VAR$A<- A
  mdl$VAR$B<- B
- mdl$VAR$B_0<- mdl$VECM[["Lambda"]][,1:(m-n)]
+ mdl$VAR$B_0<- as.matrix(mdl$VECM[["Lambda"]][,1:(m-n)],ncol=m-n)
  if (!is.null(exo)) {
   Upsilon <- vector("list",lex)
   if ((lex>1) && (q>1)) {
@@ -108,10 +108,13 @@ if (mdls[["type"]]=="weakly exogenous VECM") {
  # VAR model:   Y_t = A_1 Y_{t-1}+...+ A_k Y_{t-k} +\Phi D_t+\epsilon_t
  p<- mdl$VECM[["p"]]
  n<- mdl$VECM[["n"]]
+ 
+ Pi <- mdls$Pi[1:n,1:n]
+ 
  A<- vector("list",p)
  # NOTE: k>0 is assumed!
  if (p>1) {
-  A[[1]]<- diag(n)+mdl$VECM[["Pi"]]+mdl$VECM[["Gamma"]][[1]]
+  A[[1]]<- diag(n)+Pi+mdl$VECM[["Gamma"]][[1]]
   if (p>2) {
    for (i in 2:(p-1)) {
     A[[i]]<- mdl$VECM[["Gamma"]][[i]]-mdl$VECM[["Gamma"]][[i-1]]
@@ -119,7 +122,7 @@ if (mdls[["type"]]=="weakly exogenous VECM") {
   }
   A[[p]]<- -mdl$VECM[["Gamma"]][[p-1]]
  } else if (p==1) {
-  A[[1]]<- diag(n)+mdl$VECM[["Pi"]]
+  A[[1]]<- diag(n)+Pi
  }
  mdl$VAR$A<- A
  for (pn in names(mdl$VECM)) {

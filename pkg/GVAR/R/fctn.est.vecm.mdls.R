@@ -1,4 +1,4 @@
-est.vecm.mdls <- function (Y.ts,etw,p,case,r,season=NULL,season.start.time=NULL)
+est.vecm.mdls <- function (Y.ts,etw,p,case,r,ex=0,lex=NULL,season=NULL,season.start.time=NULL)
 ## notation: almost as in Johansen's book "Likelihood-based Inference in Cointegrated VAR Models"
 ## model:
 # \Delta Y_t = \Pi Y_{t-1}+\sum_{i=1}^{k-1} \Gamma_i\Delta Y_{t-i}+\mu_0+\mu_1 t+\Phi D_t+\epsilon_t, where \epsilon_t is N(0,\Omega)
@@ -6,7 +6,16 @@ est.vecm.mdls <- function (Y.ts,etw,p,case,r,season=NULL,season.start.time=NULL)
 freq <- etw[["freq"]] # time sampling frequency
 dt <- 1/freq # time sampling interval
 T <- (etw[["end"]]-etw[["start"]])*freq+1  # number of time samples for estimation
-n <- dim(Y.ts)[2] # number of variables in Y_t
+n <- dim(Y.ts)[2] - ex # number of endogenous variables in Y_t
+
+if (is.null(lex)) lex <- 0
+
+if (ex>0)
+{
+  d.ts <- Y.ts[,-(1:n)]
+  Y.ts <- Y.ts[,1:n]
+  if (ex>1) {dimnames(d.ts)[[2]]<- dimnames(Y.ts)[[2]][-(1:n)]}
+}
 
 if (case=="I"){case <- "H_2(r)"}
 if (case=="II"){case <- "H_1^*(r)"}
@@ -40,6 +49,27 @@ if (p>1) {
   rownames(Z2)[((i-1)*n+1):(i*n)]<- paste("DY", 1:n,"-",i, sep = "")
  }
 }
+
+if (ex!=0)
+{
+  for (i in 0:(lex-1))
+  {
+    Z2 <- rbind(Z2,t(diff(window(d.ts,start=etw[["start"]]-(1+i)*dt,end=etw[["end"]]-i*dt))))
+    rownames(Z2)[((p-1)*n+ex*i+1):((p-1)*n+ex*(i+1))] <- paste("D",colnames(Y.ts)[-(1:n)],"-",i,sep="")
+  }
+}
+
+#-------------------------------
+#achtung testzeile:
+#-------------------------------
+#Z0[6,Z0[6,]>0.3] <- Z0[6,Z0[6,]>0.3]-0.15
+#Z0[6,Z0[6,]<(-0.3)] <- Z0[6,Z0[6,]<(-0.3)]+0.15
+#
+#Z2[6,Z2[6,]>0.3] <- Z2[6,Z2[6,]>0.3]-0.15
+#Z2[6,Z2[6,]<(-0.3)] <- Z2[6,Z2[6,]<(-0.3)]+0.15
+#-------------------------------
+#testzeile ende
+#-------------------------------
 
 if (is.element(case, c("H(r)","H_1(r)","H_2(r)"))) {
  Z2<- rbind(Z2, Dt)
@@ -105,7 +135,7 @@ if (r==0) {
  beta <- NULL
  alpha <- NULL
  Pi <- matrix(0,nrow=n,ncol=dim(Z1)[1])
- if (length(Z2)) Psi <- M02%*%M22.inv
+ if (length(Z2)) Psi_ <- M02%*%M22.inv
  Omega <- S00
 }
 
@@ -117,7 +147,7 @@ if ((r>0)&(r<n)) {
  	}
  alpha <- S01%*%beta%*%solve(t(beta)%*%S11%*%beta)
  Pi <- alpha%*%t(beta)
- if (length(Z2)) Psi <- M02%*%M22.inv-Pi%*%M12%*%M22.inv
+ if (length(Z2)) Psi_ <- M02%*%M22.inv-Pi%*%M12%*%M22.inv
  Omega <- S00-Pi%*%S11%*%t(Pi)
 }
 
@@ -125,13 +155,13 @@ if (r==n) {
  beta <- NULL
  alpha <- NULL
  Pi <- S01%*%S11.inv
- if (length(Z2)) Psi <- M02%*%M22.inv-Pi%*%M12%*%M22.inv
+ if (length(Z2)) Psi_ <- M02%*%M22.inv-Pi%*%M12%*%M22.inv
  Omega <- S00-Pi%*%S11%*%t(Pi)
 }
 
 ## residuals ############################################################
 
-if (length(Z2)) {U <- Z0 - Pi%*%Z1 - Psi%*%Z2} else {U <- Z0 - Pi%*%Z1}
+if (length(Z2)) {U <- Z0 - Pi%*%Z1 - Psi_%*%Z2} else {U <- Z0 - Pi%*%Z1}
 
 # this is needed for t-values
 Y <- Z0 - Pi%*%Z1 
@@ -142,7 +172,7 @@ Gamma <- NULL
 if (p>1) {
  Gamma_ <- list()
  for (i in (1:(p-1)) ) {
-  Gamma_[[i]]<- Psi[,(1+(i-1)*n):(i*n)]
+  Gamma_[[i]]<- Psi_[,(1+(i-1)*n):(i*n)]
  }
  Gamma <- Gamma_
 }
@@ -152,18 +182,27 @@ mu1 <- NULL
 Phi <- NULL
 
 if ( case=="H(r)" && length(Z2) ) {
- mu0 <- Psi[,(p-1)*n+1]
- mu1 <- Psi[,(p-1)*n+2]
- Phi <- Psi[,-(1:((p-1)*n+2))]
+ Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*(lex-1))]
+ mu0 <- Psi_[,(p-1)*n+(lex-1)*ex+1]
+ mu1 <- Psi_[,(p-1)*n+(lex-1)*ex+2]
+ Phi <- Psi_[,-(1:((p-1)*n+(lex-1)*ex+2))]
 } else if ( case=="H_1(r)" && length(Z2) ) {
- mu0 <- Psi[,(p-1)*n+1]
- Phi <- Psi[,-(1:((p-1)*n+1))]
+ Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*(lex-1))]
+ mu0 <- Psi_[,(p-1)*n+(lex-1)*ex+1]
+ Phi <- Psi_[,-(1:((p-1)*n+(lex-1)*ex+1))]
 } else if ( case=="H_2(r)" && length(Z2) ) {
-	if (p>1) {Phi <- Psi[,-(1:((p-1)*n))]} else {Phi <- Psi}
+	if (p>1 || lex>0) 
+  {
+    Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*(lex-1))]
+    Phi <- Psi_[,-(1:((p-1)*n)+(lex-1)*ex)]
+  } else {    
+    Phi <- Psi_[,-(1:((p-1)*n)+(lex-1)*ex)]
+  }
 } else if ( case=="H^*(r)" ) {
  if ( length(Z2) ) {
-  mu0 <- Psi[,(p-1)*n+1]
-  Phi <- Psi[,-(1:((p-1)*n+1))]
+  Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*(lex-1))]
+  mu0 <- Psi_[,(p-1)*n+(lex-1)*ex+1]
+  Phi <- Psi_[,-(1:((p-1)*n+(lex-1)*ex+1))]
  }
  if (r>0 & r<n) {
   mu1 <- alpha%*%t(beta)[,n+1]
@@ -172,7 +211,7 @@ if ( case=="H(r)" && length(Z2) ) {
 #   mu1[[paste("rank",r)]]<- alpha[[paste("rank",r)]]%*%beta[[paste("rank",r)]][n+1,]
 #   beta[[paste("rank",r)]]<- beta[[paste("rank",r)]][-(n+1),]
 # Pi <- Pi[1:n,1:n]
-} else if (case=="H_1^*(r)" && length(Z2)) {
+} else if (case=="H_1^*(r)") {
  if (r>0 & r<n) {
   mu0 <- alpha%*%t(beta)[,n+1]
 #  beta <- beta[-(n+1),]
@@ -180,7 +219,13 @@ if ( case=="H(r)" && length(Z2) ) {
 # Pi <- Pi[1:n,1:n]
 #   mu0[[paste("rank",r)]]<- alpha[[paste("rank",r)]]%*%beta[[paste("rank",r)]][n+1,]
  if ( length(Z2) ) {
-  if (p>1) {Phi <- Psi[,-(1:((p-1)*n))]} else {Phi <- Psi}
+  if (p>1 || lex>0) 
+  {
+    Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*(lex-1))]
+    Phi <- Psi_[,-(1:((p-1)*n+(lex-1)*ex))]
+  } else {
+    Phi <- Psi_
+  }
   
 #   beta[[paste("rank",r)]]<- beta[[paste("rank",r)]][-(n+1),]
  }
@@ -290,7 +335,7 @@ pvals <- as.list(pvals)
 # various test statistics and critical values
 
 # collect all estimated models for r=0:n in a list:
-mdls <- list(type="pure VECM",dat=Y.ts,freq=freq,n=n,p=p,T=T,r=r,season=season,season.start.time=season.start.time,alpha=alpha,beta=beta,Pi=Pi,Gamma=Gamma,case=case,mu0=mu0,mu1=mu1,Phi=Phi,Omega=Omega,residuals=t(U),S=list(S00=S00,S10=S10,S01=S01,S11=S11),lambda=lambda,se=se,tvals=tvals,pvals=pvals) 
+mdls <- list(type="pure VECM",dat=Y.ts,freq=freq,n=n,p=p,T=T,r=r,season=season,season.start.time=season.start.time,alpha=alpha,beta=beta,Pi=Pi,Gamma=Gamma,case=case,mu0=mu0,mu1=mu1,Phi=Phi,Psi=Psi,Omega=Omega,residuals=t(U),S=list(S00=S00,S10=S10,S01=S01,S11=S11),lambda=lambda,se=se,tvals=tvals,pvals=pvals) 
 class(mdls) <- "vecm"
 return(mdls)
 }

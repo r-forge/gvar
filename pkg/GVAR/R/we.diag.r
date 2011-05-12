@@ -12,7 +12,9 @@ we.diag <- function(Z,n,p,q=p,case)
 #  it follows (b) that X is not cointegrated on its own, and (c) that the
 #  differenced process does not depend on the lagged Z.
 
-  source("cv.tables.pesaran.r")
+  data(CV.maxeigen.table)
+  data(CV.trace.table)
+  #source("cv.tables.pesaran.r")
   
   m <- dim(Z)[2]                        # number of total variables
   k <- m-n                              # number of X variables
