@@ -1,12 +1,12 @@
 Package: GVAR
 Type: Package
 Title: Vector Error Correction Model (VECM), VECM with exogenous I(1) variables, Global VAR (GVAR)
-Version: 0.5
-Date: 2010-12-20
-Author: Rainer Puhr <rainer.puhr@aon.at>, Klaus Rheinberger <Klaus.Rheinberger@fhv.at>, Martin Summer <Martin.Summer@oenb.at> with contributions from Stefan Zeugner <Stefan.Zeugner@ulb.ac.be>.
+Version: 0.6
+Date: 2011-08-01
+Author: Rainer Puhr <rainer.puhr@aon.at>, Klaus Rheinberger <Klaus.Rheinberger@fhv.at>, Martin Summer <Martin.Summer@oenb.at>, Martin.Feldkircher <Martin.Feldkircher@oenb.at> with contributions from Stefan Zeugner <Stefan.Zeugner@ulb.ac.be>.
 Maintainer: Rainer Puhr <rainer.puhr@aon.at>
-Depends: R (>= 2.7.0), nlme, tseries, far
-Suggests: MASS
+Depends: R (>= 2.7.0), nlme
+Suggests: MASS, far
 Description: Estimate, test and simulate VECM and GVAR models, forcast and impulse response analysis.
 License: GPL (>= 2)
 URL: http://www.r-project.org

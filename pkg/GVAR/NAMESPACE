@@ -1,0 +1,6 @@
+exportPattern(".")
+
+import(nlme)
+
+S3method(print,vecm)
+S3method(summary,vecm)
