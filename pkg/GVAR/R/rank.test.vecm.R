@@ -1,4 +1,4 @@
-rank.test.vecm <- function (Y.ts,etw,p,case,season=NULL,season.start.time=NULL)
+rank.test.vecm <- function (Y.ts,etw,p,case,ex=0,lex=NULL,season=NULL,season.start.time=NULL)
 ## notation: almost as in Johansen's book "Likelihood-based Inference in Cointegrated VAR Models"
 ## model:
 # \Delta Y_t = \Pi Y_{t-1}+\sum_{i=1}^{k-1} \Gamma_i\Delta Y_{t-i}+\mu_0+\mu_1 t+\Phi D_t+\epsilon_t, where \epsilon_t is N(0,\Omega)
@@ -7,7 +7,16 @@ rank.test.vecm <- function (Y.ts,etw,p,case,season=NULL,season.start.time=NULL)
 freq<- etw[["freq"]] # time sampling frequency
 dt<- 1/freq # time sampling interval
 T<- (etw[["end"]]-etw[["start"]])*freq+1  # number of time samples for estimation
-n<- dim(Y.ts)[2] # number of variables in Y_t
+n<- dim(Y.ts)[2]-ex # number of variables in Y_t
+
+if (is.null(lex)) lex <- 0
+
+if (ex>0)
+{
+  d.ts <- Y.ts[,-(1:n)]
+  Y.ts <- Y.ts[,1:n]
+  if (ex>1) {dimnames(d.ts)[[2]]<- dimnames(Y.ts)[[2]][-(1:n)]}
+}
 
 if (case=="I"){case <- "H_2(r)"}
 if (case=="II"){case <- "H_1^*(r)"}
@@ -42,6 +51,15 @@ if (p>1) {
  }
 }
 
+if (ex!=0)
+{
+  for (i in 0:(lex-1))
+  {
+    Z2 <- rbind(Z2,t(diff(window(d.ts,start=etw[["start"]]-(1+i)*dt,end=etw[["end"]]-i*dt))))
+    rownames(Z2)[((p-1)*n+ex*i+1):((p-1)*n+ex*(i+1))] <- paste("D",colnames(Y.ts)[-(1:n)],"-",i,sep="")
+  }
+}
+
 if (is.element(case, c("H(r)","H_1(r)","H_2(r)"))) {
  Z2<- rbind(Z2, Dt)
 } else if (case=="H^*(r)") {
@@ -61,6 +79,9 @@ if (!(is.null(season))) { # seasonal dummies
  dum<- dum[,1:T]
  Z2<- rbind(Z2,dum)
 }
+
+
+
 ## product moment matrices M_{ij}, Residuals R_i
 M00 <- tcrossprod(Z0)/T # tcrossprod(x,y) is the same as x%*%t(y) but faster
 M11 <- tcrossprod(Z1)/T

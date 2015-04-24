@@ -10,6 +10,7 @@ if (x[["type"]]=="pure VECM")
       colnames(beta) <- paste(1:x$r,".:   ",sep="")
     }
     Gamma <- x$Gamma
+    Psi <- x$Psi
     const <- cbind(x$mu0,x$mu1)
     nam <- vector()
     if (!is.null(x$mu0)) {nam <- c(nam,"         Const")}
@@ -31,7 +32,7 @@ if (x[["type"]]=="pure VECM")
     cat("Coefficients:\n")
     if (!(x$r==x$n))
     {
-      cat("Beta:\n")
+      cat("Beta':\n")
       print(t(beta))
       cat("\n")
       cat("Alpha:\n")
@@ -50,9 +51,21 @@ if (x[["type"]]=="pure VECM")
       print(Gammer)
       cat("\n")
     }
+    if (x$ex>0)
+    {
+      Psis <- NULL
+      cat("Psi:\n")
+      for (i in 1:length(Psi))
+      {        
+        colnames(Psi[[i]])[1] <- paste("        ",colnames(Psi[[i]])[1])
+        Psis <- cbind(Psis,round(Psi[[i]],roundto))
+      }
+      print(Psis)
+      cat("\n")
+    }    
     if (!is.null(x$mu0) || !is.null(x$mu1))
     { 
-      cat("Intercept (and Trend) in VAR:\n")
+      cat("Intercept (and Trend) in VECM:\n")
       print(const)
       cat("\n")
     }
@@ -100,7 +113,7 @@ if (x[["type"]]=="pure VECM")
     cat("Coefficients:\n")
     if (!(x$r==x$n))
     {
-      cat("Beta:\n")
+      cat("Beta':\n")
       print(t(beta))
       cat("\n")
       cat("Alpha:\n")
@@ -138,7 +151,7 @@ if (x[["type"]]=="pure VECM")
     }
     if (!is.null(x$c.0) || !is.null(x$c.1))
     { 
-      cat("Intercept (and Trend) in VAR:\n")
+      cat("Intercept (and Trend) in VECM:\n")
       print(const)
       cat("\n")
     }

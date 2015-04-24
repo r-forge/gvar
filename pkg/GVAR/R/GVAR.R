@@ -245,12 +245,24 @@ GVAR=function (Data, tw = NULL, p, q = p, r = NULL, weight, Case,
                   }
                 }
             } else {
-                for (r_ in 0:(n[i] - 1)) {
-                  CV <- ranks$CV.maxeigen[[paste("rank", r_,
+                if (is.null(we[[i]]))
+                {
+                  for (r_ in 0:(n[i] - 1)) 
+                  {
+                    CV <- ranks$CV.trace[[paste("rank", r_, "vs.", n[i])]][1, 1]
+                    if ((ranks$LR.trace[[paste("rank", r_, "vs.", n[i])]][1] < CV) && is.na(r[i])) 
+                    {
+                      r[i] <- r_
+                    }
+                  }
+                } else {
+                  for (r_ in 0:(n[i] - 1)) {
+                    CV <- ranks$CV.maxeigen[[paste("rank", r_,
                     "vs.", r_ + 1)]][1, 1]
-                  if ((is.na(r[i]) && (ranks$LR.maxeigen[[paste("rank",
+                    if ((is.na(r[i]) && (ranks$LR.maxeigen[[paste("rank",
                     r_, "vs.", r_ + 1)]][1] < CV))) {
-                    r[i] <- r_
+                      r[i] <- r_
+                    }
                   }
                 }
             }
@@ -285,9 +297,10 @@ GVAR=function (Data, tw = NULL, p, q = p, r = NULL, weight, Case,
         names(models)[i] <- names(Data)[i]
         cmodel[[i]] <- set.mdl(mdls, exo = exo)
     }
+   # browser()
     G <- NULL
     for (i in 1:(N + 1)) {
-        Ac <- cbind(diag(n[i]), -cmodel[[i]]$VAR$B_0)
+        Ac <- cbind(diag(n[i]), (-1)*cmodel[[i]]$VAR$B_0)
         Wc <- W[[i]]
         G <- rbind(G, Ac %*% Wc)
     }
@@ -297,15 +310,14 @@ GVAR=function (Data, tw = NULL, p, q = p, r = NULL, weight, Case,
             if (p[j] < i) {
                 AA <- matrix(0, dim(cmodel[[j]]$VAR$A[[1]])[1],
                   dim(cmodel[[j]]$VAR$A[[1]])[2])
-            }
-            else {
+            } else {
                 AA <- cmodel[[j]]$VAR$A[[i]]
             }
             if (q[j] < i) {
-                BB <- matrix(0, dim(cmodel[[j]]$VAR$B[[1]])[1],
-                  dim(cmodel[[j]]$VAR$B[[1]])[2])
-            }
-            else {
+              if (models[[j]]$type=="weakly exogenous VECM") {
+                BB <- matrix(0, dim(cmodel[[j]]$VAR$B[[1]])[1], dim(cmodel[[j]]$VAR$B[[1]])[2])
+                } else {BB <- NULL}
+            } else {
                 BB <- cmodel[[j]]$VAR$B[[i]]
             }
             Ac <- cbind(AA, BB)

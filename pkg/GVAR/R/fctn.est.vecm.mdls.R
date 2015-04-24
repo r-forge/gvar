@@ -26,7 +26,7 @@ if (case=="V"){case <- "H(r)"}
 ## construct deterministic terms (Dt) matrix:
 if (case=="H(r)") {
  Dt<- rbind(rep(1,T),seq(etw[["start"]],etw[["end"]],by=dt))
- rownames(Dt)<- c("Const","t")
+ rownames(Dt)<- c("Const","t")                             
 } else if (case=="H_1(r)") {
  Dt<- rbind(rep(1,T)); rownames(Dt)<- c("Const")
 } else if (case=="H_2(r)") {
@@ -59,17 +59,6 @@ if (ex!=0)
   }
 }
 
-#-------------------------------
-#achtung testzeile:
-#-------------------------------
-#Z0[6,Z0[6,]>0.3] <- Z0[6,Z0[6,]>0.3]-0.15
-#Z0[6,Z0[6,]<(-0.3)] <- Z0[6,Z0[6,]<(-0.3)]+0.15
-#
-#Z2[6,Z2[6,]>0.3] <- Z2[6,Z2[6,]>0.3]-0.15
-#Z2[6,Z2[6,]<(-0.3)] <- Z2[6,Z2[6,]<(-0.3)]+0.15
-#-------------------------------
-#testzeile ende
-#-------------------------------
 
 if (is.element(case, c("H(r)","H_1(r)","H_2(r)"))) {
  Z2<- rbind(Z2, Dt)
@@ -128,7 +117,7 @@ lambda<- eig[["values"]] # already sorted in decreasing order
 V<- t(C.inv)%*%eig[["vectors"]]
 ## eventually normalize V
 V.orig <- V
-if (0) {V <- sapply(1:n, function(x) V[,x]/V[1,x])}
+if (0) {V <- sapply(1:(n+ex), function(x) V[,x]/V[1,x])}
 
 ## compute beta, alpha, Pi, Psi, Omega etc. matrices for all ranks 0:p
 if (r==0) {
@@ -139,7 +128,7 @@ if (r==0) {
  Omega <- S00
 }
 
-if ((r>0)&(r<n)) {
+if ((r>0)&(r<n+ex)) {
  beta <- as.matrix(V[,1:r])
  if (1) {
  	beta <- as.matrix(V[,1:r]%*%solve(V[1:r,1:r]),ncol=r)
@@ -151,7 +140,7 @@ if ((r>0)&(r<n)) {
  Omega <- S00-Pi%*%S11%*%t(Pi)
 }
 
-if (r==n) {                                             
+if (r==n+ex) {                                             
  beta <- NULL
  alpha <- NULL
  Pi <- S01%*%S11.inv
@@ -166,7 +155,7 @@ if (length(Z2)) {U <- Z0 - Pi%*%Z1 - Psi_%*%Z2} else {U <- Z0 - Pi%*%Z1}
 # this is needed for t-values
 Y <- Z0 - Pi%*%Z1 
 
-## compute Gamma_i, mu_t, Phi matrices and vectors for all ranks 0:n 
+## compute Gamma_i, mu_t, Psi, Phi matrices and vectors 
 
 Gamma <- NULL
 if (p>1) {
@@ -177,60 +166,70 @@ if (p>1) {
  Gamma <- Gamma_
 }
 
-mu0 <- NULL
-mu1 <- NULL
-Phi <- NULL
+mu0 <- NULL       # constant
+mu1 <- NULL       # trend
+Phi <- NULL       # season
+Psi <- NULL       # exogenous
 
 if ( case=="H(r)" && length(Z2) ) {
- Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*(lex-1))]
+ if (ex>0) Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*lex)]
  mu0 <- Psi_[,(p-1)*n+(lex-1)*ex+1]
  mu1 <- Psi_[,(p-1)*n+(lex-1)*ex+2]
- Phi <- Psi_[,-(1:((p-1)*n+(lex-1)*ex+2))]
+ Phi <- Psi_[,-(1:((p-1)*n+lex*ex+2))]
+ 
 } else if ( case=="H_1(r)" && length(Z2) ) {
- Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*(lex-1))]
+ if (ex >0) Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*lex)]
  mu0 <- Psi_[,(p-1)*n+(lex-1)*ex+1]
- Phi <- Psi_[,-(1:((p-1)*n+(lex-1)*ex+1))]
+ Phi <- Psi_[,-(1:((p-1)*n+lex*ex+1))]
+ 
 } else if ( case=="H_2(r)" && length(Z2) ) {
 	if (p>1 || lex>0) 
   {
-    Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*(lex-1))]
-    Phi <- Psi_[,-(1:((p-1)*n)+(lex-1)*ex)]
+    if (ex>0) Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*lex)]
+    Phi <- Psi_[,-(1:((p-1)*n)+lex*ex)]
   } else {    
-    Phi <- Psi_[,-(1:((p-1)*n)+(lex-1)*ex)]
+    Phi <- Psi_[,-(1:((p-1)*n)+lex*ex)]
   }
+  
 } else if ( case=="H^*(r)" ) {
  if ( length(Z2) ) {
-  Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*(lex-1))]
-  mu0 <- Psi_[,(p-1)*n+(lex-1)*ex+1]
-  Phi <- Psi_[,-(1:((p-1)*n+(lex-1)*ex+1))]
+  if (ex >0) Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*lex)]
+  mu0 <- Psi_[,(p-1)*n+lex*ex+1]
+  Phi <- Psi_[,-(1:((p-1)*n+lex*ex+1))]
  }
  if (r>0 & r<n) {
   mu1 <- alpha%*%t(beta)[,n+1]
-#  beta <- as.matrix(beta[-(n+1),],ncol=r)
  }
-#   mu1[[paste("rank",r)]]<- alpha[[paste("rank",r)]]%*%beta[[paste("rank",r)]][n+1,]
-#   beta[[paste("rank",r)]]<- beta[[paste("rank",r)]][-(n+1),]
-# Pi <- Pi[1:n,1:n]
+
 } else if (case=="H_1^*(r)") {
- if (r>0 & r<n) {
-  mu0 <- alpha%*%t(beta)[,n+1]
-#  beta <- beta[-(n+1),]
- }
-# Pi <- Pi[1:n,1:n]
-#   mu0[[paste("rank",r)]]<- alpha[[paste("rank",r)]]%*%beta[[paste("rank",r)]][n+1,]
  if ( length(Z2) ) {
   if (p>1 || lex>0) 
   {
-    Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*(lex-1))]
-    Phi <- Psi_[,-(1:((p-1)*n+(lex-1)*ex))]
+    if (ex>0) Psi <- Psi_[,((p-1)*n+1):((p-1)*n+ex*lex)]
+    Phi <- Psi_[,-(1:((p-1)*n+lex*ex))]
   } else {
     Phi <- Psi_
   }
-  
-#   beta[[paste("rank",r)]]<- beta[[paste("rank",r)]][-(n+1),]
+ }
+ if (r>0 & r<n) {
+  mu0 <- alpha%*%t(beta)[,n+1]
  }
 }
 
+# build list of Psi
+
+if (!is.null(Psi)) 
+{
+  Psi <- matrix(Psi,nrow=n)
+  Phi_ <- vector("list",length=lex)
+  for (i in 1:lex)
+  {
+    Phi_[[i]] <- matrix(Psi[,((i-1)*ex+1):(i*ex)],nrow=n)
+    colnames(Phi_[[i]]) <- colnames(Psi_)[((p-1)*n+1+(i-1)*ex):((p-1)*n+ex*i)]
+    rownames(Phi_[[i]]) <- rownames(Psi_) 
+  }
+  Psi <- Phi_
+}
 
 ## t-values #############################################################
 
@@ -249,6 +248,7 @@ if (r==1)
   Omega.b <- solve(matrix(Z1[-(1:r),],ncol=T)%*%M%*%t(matrix(Z1[-(1:r),],ncol=T)))%x%solve(t(alpha)%*%solve(Sigma.u.tilde)%*%alpha)
 }
 tvals$beta <- beta[-(1:r),]/sqrt(diag(Omega.b))
+se$beta <- matrix(sqrt(diag(Omega.b)),ncol=r)
 
 # other parameters
 if (length(Z2))
@@ -283,6 +283,26 @@ if (p>1)
   }
 }
 
+if (ex!=0)
+{
+  se$Psi <- list()
+  tvals$Psi <- list()
+  pvals$Psi <- list()
+  for (j in 1:lex) 
+  {
+    se$Psi[[j]] <- matrix(NA,n,ex)
+    tvals$Psi[[j]] <- matrix(NA,n,ex)
+    pvals$Psi[[j]] <- matrix(NA,n,ex)
+    for (i in 1:n)
+    {
+      se$Psi[[j]][i,] <- summary(res.final)[[i]]$coefficients[((p-1)*n+(j-1)*ex+1):((p-1)*n+j*ex),2]
+      tvals$Psi[[j]][i,] <- summary(res.final)[[i]]$coefficients[((p-1)*n+(j-1)*ex+1):((p-1)*n+j*ex),3]
+      pvals$Psi[[j]][i,] <- summary(res.final)[[i]]$coefficients[((p-1)*n+(j-1)*ex+1):((p-1)*n+j*ex),4]      
+    }
+    dimnames(se$Psi[[j]]) <- dimnames(tvals$Psi[[j]]) <- dimnames(pvals$Psi[[j]]) <- dimnames(Psi[[j]])
+  }
+}
+
 temp <- 1
 if (case=="H_1(r)" || case=="H^*(r)" || case=="H(r)")
 {
@@ -291,9 +311,9 @@ if (case=="H_1(r)" || case=="H^*(r)" || case=="H(r)")
   pvals$mu0 <- vector()                         
   for (i in 1:n)
   {
-    se$mu0[i] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+temp),2]
-    tvals$mu0[i] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+temp),3]
-    pvals$mu0[i] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+temp),4]
+    se$mu0[i] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+ex*lex+temp),2]
+    tvals$mu0[i] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+ex*lex+temp),3]
+    pvals$mu0[i] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+ex*lex+temp),4]
   }
   temp <- temp+1
 } 
@@ -304,9 +324,9 @@ if (case=="H(r)")
   pvals$mu1 <- vector()
   for (i in 1:n)
   {
-    se$mu1[i] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+temp),2]
-    tvals$mu1[i] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+temp),3]
-    pvals$mu1[i] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+temp),4]
+    se$mu1[i] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+ex*lex+temp),2]
+    tvals$mu1[i] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+ex*lex+temp),3]
+    pvals$mu1[i] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+ex*lex+temp),4]
   }
   temp <- temp+1
 }
@@ -317,13 +337,16 @@ if (!is.null(season))
   pvals$season <- matrix(NA,n,season-1)
   for (i in 1:n)
   { 
-  se$season[i,] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+temp):dim(summary(res.final)[[i]]$coefficients)[1],2]
-  tvals$season[i,] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+temp):dim(summary(res.final)[[i]]$coefficients)[1],3]
-  pvals$season[i,] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+temp):dim(summary(res.final)[[i]]$coefficients)[1],4]
+  se$season[i,] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+ex*lex+temp):dim(summary(res.final)[[i]]$coefficients)[1],2]
+  tvals$season[i,] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+ex*lex+temp):dim(summary(res.final)[[i]]$coefficients)[1],3]
+  pvals$season[i,] <- summary(res.final)[[i]]$coefficients[(n*(p-1)+ex*lex+temp):dim(summary(res.final)[[i]]$coefficients)[1],4]
   }
   rownames(se$season) <- rownames(tvals$season) <- rownames(pvals$season) <- rownames(Phi)
   colnames(se$season) <- colnames(tvals$season) <- colnames(pvals$season) <- paste("s",1:(season-1),sep="")
 }
+
+
+
 se <- as.list(se)
 tvals <- as.list(tvals)
 pvals <- as.list(pvals)
@@ -335,7 +358,7 @@ pvals <- as.list(pvals)
 # various test statistics and critical values
 
 # collect all estimated models for r=0:n in a list:
-mdls <- list(type="pure VECM",dat=Y.ts,freq=freq,n=n,p=p,T=T,r=r,season=season,season.start.time=season.start.time,alpha=alpha,beta=beta,Pi=Pi,Gamma=Gamma,case=case,mu0=mu0,mu1=mu1,Phi=Phi,Psi=Psi,Omega=Omega,residuals=t(U),S=list(S00=S00,S10=S10,S01=S01,S11=S11),lambda=lambda,se=se,tvals=tvals,pvals=pvals) 
+mdls <- list(type="pure VECM",dat=Y.ts,freq=freq,n=n,p=p,ex=ex,lex=lex,T=T,r=r,season=season,season.start.time=season.start.time,alpha=alpha,beta=beta,Pi=Pi,Gamma=Gamma,case=case,mu0=mu0,mu1=mu1,Phi=Phi,Psi=Psi,Omega=Omega,residuals=t(U),S=list(S00=S00,S10=S10,S01=S01,S11=S11),lambda=lambda,se=se,tvals=tvals,pvals=pvals) 
 class(mdls) <- "vecm"
 return(mdls)
 }

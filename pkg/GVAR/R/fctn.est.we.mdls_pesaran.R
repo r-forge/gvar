@@ -1,4 +1,4 @@
-est.we.mdls <- function (z.ts,etw,p,q=p,n,ex=0,lex=NULL,case,r)
+est.we.mdls2 <- function (z.ts,etw,p,q=p,n,ex=0,lex=NULL,case,r,we.test=FALSE)
 ## notation: mixture of
 # [1] Pesaran et al. "Structural Analysis of VECMs with exog. I(1) variables", Journal of Econometrics 97 (2000) p. 293-343
 # [2] Johansen's book "Likelihood-based Inference in Cointegrated VAR Models"
@@ -78,6 +78,10 @@ if (max(p,q)>1) {
 
 if (ex!=0)
 {
+  temp <- t(window(d.ts,start= etw[["start"]]-dt, end= etw[["end"]]-dt))
+  rownames(temp) <- paste(colnames(z.ts)[-(1:m)],"-1",sep="")
+  Z1 <- rbind(Z1,temp)
+
   for (i in 0:(lex-1))
   {
     Z2 <- rbind(Z2,t(diff(window(d.ts,start=etw[["start"]]-(1+i)*dt,end=etw[["end"]]-i*dt))))
@@ -89,10 +93,10 @@ if (ex!=0)
 if (is.element(case, c("I","III","V"))) {
  Z2<- rbind(Z2, Dt)
 } else if (case=="II") {
- Z1<- rbind(Z1, 1); rownames(Z1)[m+1]<- "constant"
+ Z1<- rbind(Z1, 1); rownames(Z1)[dim(Z1)[1]]<- "constant"
 } else if (case=="IV") {
  Z1<- rbind(Z1,1:T)
- rownames(Z1)[m+1]<- "t"
+ rownames(Z1)[dim(Z1)[1]]<- "t"
  Z2<- rbind(Z2, 1); rownames(Z2)[(p-1)*n+q*k+lex*ex+1]<- "constant"
 } else {stop("\nUnkown case.\n")}
 
@@ -153,9 +157,16 @@ if (r==0){
 
 if ((r>0) & (r<n)) {
  beta <- as.matrix(V[,1:r])
- if (1) {beta <- as.matrix(V[,1:r]%*%solve(V[1:r,1:r]))}
+ print(beta)
  alpha <- S01%*%beta%*%solve(t(beta)%*%S11%*%beta)
+ print(alpha)
+ print(alpha%*%t(beta))
+ if (1) {beta <- as.matrix(V[,1:r]%*%solve(V[1:r,1:r]))}
+ print(beta)
+ alpha <- S01%*%beta%*%solve(t(beta)%*%S11%*%beta)
+ print(alpha)
  Pi.y <- alpha%*%t(beta)
+ print(Pi.y)
  Psi_ <- M02%*%M22.inv-Pi.y%*%M12%*%M22.inv
  Omega.uu <-S00-Pi.y%*%S11%*%t(Pi.y)
 }
@@ -240,22 +251,45 @@ if (case=="V") {
   c.0 <- as.matrix(Psi_[,dim(Psi_)[2]],n,1)
   colnames(c.0) <- "Const"
   if (r>0 & r<n) {
-    c.1 <- alpha%*%t(beta)[,m+1]
+    c.1 <- alpha%*%t(beta)[,m+ex+1]
     colnames(c.1) <- "Trend"
 #    beta <- beta[-(m+1),]
   }
-  c.1 <- as.matrix(Pi.y[,m+1],n,1)
+  c.1 <- as.matrix(Pi.y[,m+ex+1],n,1)
   colnames(c.1) <- "Trend"
 #  Pi.y <- Pi.y[,1:m]
 } else if (case=="II") {
   if (r>0 & r<n) {
-    c.0 <- alpha%*%t(beta)[,m+1]
+    c.0 <- alpha%*%t(beta)[,m+ex+1]
     colnames(c.0) <- "Const"
 #    beta <- beta[-(m+1),]
   }
-  c.0 <- as.matrix(Pi.y[,m+1],n,1)
+  c.0 <- as.matrix(Pi.y[,m+ex+1],n,1)
   colnames(c.0) <- "Const"
 #  Pi.y <- Pi.y[,1:m]
+}
+
+## test for weak exogeneity #############################################################
+
+we.test.res <- NULL
+if (we.test==TRUE)
+{
+  we.res <- matrix(NA,nrow=m-n,ncol=3)
+  colnames(we.res) <- c("F Stat.","crit. Value","p-Value")
+  rownames(we.res) <- colnames(z.ts)[(n+1):m]
+  for (i in 1:(m-n))
+  {
+  	t1 <- lm(t(Z2)[,i] ~ t(Z2)[,-(1:(m-n))])
+  	t2 <- lm(t(Z2)[,i] ~ t(t(beta)%*%Z1)+t(Z2)[,-(1:(m-n))])
+  	
+  	Fstat <- ((sum(t1$residuals^2)-sum(t2$residuals^2))/dim(t(t(beta)%*%Z1))[2])/(sum(t2$residuals^2)/(T-dim(t(t(beta)%*%Z1))[2]-dim(t(Z2)[,-(1:(m-n))])[2]))
+  	critV <- qf(0.95,dim(t(t(beta)%*%Z1))[2],T-dim(t(t(beta)%*%Z1))[2]-dim(t(Z2)[,-(1:(m-n))])[2])
+  	pValue <- 1-pf(Fstat,dim(t(t(beta)%*%Z1))[2],T-dim(t(t(beta)%*%Z1))[2]-dim(t(Z2)[,-(1:(m-n))])[2])
+  	cat("F(",dim(t(t(beta)%*%Z1))[2],",",T-dim(t(t(beta)%*%Z1))[2]-dim(t(Z2)[,-(1:(m-n))])[2],")\n")
+	
+	 we.res[i,] <- c(Fstat,critV,pValue)
+  }
+  we.test.res <- we.res
 }
 
 ## t-values #############################################################
@@ -411,7 +445,7 @@ tvals <- as.list(tvals)
 pvals <- as.list(pvals)
 
 ## output:
-mdls <- list(type="weakly exogenous VECM",dat=z.ts,freq=freq,m=m,n=n,p=p,q=q,lex=lex,r=r,T=T,alpha=alpha,beta=beta,Pi.y=Pi.y,Phi=Phi,Psi=Psi,Lambda=Lambda,case=case,c.0=c.0,c.1=c.1,Omega.uu=Omega.uu,S=list(S00=S00,S10=S10,S01=S01,S11=S11),lambda=lambda,residuals=t(U),se=se,tvals=tvals,pvals=pvals)
+mdls <- list(type="weakly exogenous VECM",dat=z.ts,freq=freq,m=m,n=n,p=p,q=q,ex=ex,lex=lex,r=r,T=T,alpha=alpha,beta=beta,Pi.y=Pi.y,Phi=Phi,Psi=Psi,Lambda=Lambda,case=case,c.0=c.0,c.1=c.1,Omega.uu=Omega.uu,S=list(S00=S00,S10=S10,S01=S01,S11=S11),lambda=lambda,residuals=t(U),se=se,tvals=tvals,pvals=pvals,we.test.res=we.test.res)
 class(mdls) <- "vecm"
 return(mdls)
 

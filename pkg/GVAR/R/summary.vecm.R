@@ -11,9 +11,10 @@ summary.vecm <- function(object, ...)
       Beta <- NULL
     }
     Gamma <- object$Gamma
+    Psi <- object$Psi
     const <- cbind(object$mu0,object$mu1)
     nam <- vector()
-    if (!is.null(object$mu0)) {nam <- c(nam,"         Const")}
+    if (!is.null(object$mu0)) {nam <- c(nam,"       Const")}
     if (!is.null(object$mu1)) {nam <- c(nam,"Trend")}
     if (!is.null(const))
     {
@@ -35,8 +36,13 @@ summary.vecm <- function(object, ...)
 	if (!(object$r==object$n))
 	{ 
       cat("Beta':\n")
-      tvalsB <- round(object$tvals$beta,roundto)
-      l <- 0
+      if (object$r==1)
+      {
+        tvalsB <- matrix(round(object$tvals$beta,roundto),ncol=1)
+      } else {
+        tvalsB <- round(object$tvals$beta,roundto)
+      }
+      seB <- round(object$se$beta,roundto)
       for (i in 1:object$r)
       {
         temptB <- rep("-",object$r)
@@ -47,18 +53,18 @@ summary.vecm <- function(object, ...)
         } else {
       	  i.b <- object$n-object$r
         }
-        for (j in l+(1:i.b))
+        for (j in 1:i.b)
         {
-          temptB <- c(temptB,paste("[",round(tvalsB[j],2),"]",sep=""))        
+          seTemp <- c(seTemp,paste("(",format(round(seB[j,i],3),nsmall=3),")",sep=""))
+          temptB <- c(temptB,paste("[",format(round(tvalsB[j,i],2),nsmall=2),"]",sep=""))        
         }
-        seTemp <- c(seTemp,rep("NA",i.b))
 
-        BETA <- rbind(beta[,i],seTemp,temptB)
-        rownames(BETA) <- c(colnames(beta)[i],"(Std.Err.)","[t-Value]")
+        BETA <- rbind(format(beta[,i],nsmall=roundto),seTemp,temptB)
+        BETA <- rbind(BETA,rep("",dim(BETA)[2]))
+        rownames(BETA) <- c(colnames(beta)[i],"(Std.Err.)","[t-Value]","")
         print(as.data.frame(BETA))
-        l <- i*(object$n-object$r)
       }
-      cat("\n")
+      cat("\n")        
 
       cat("Alpha:\n")
       print(alpha)
@@ -85,18 +91,48 @@ summary.vecm <- function(object, ...)
         tvalTemp <- NULL
         for (j in 1:length(Gammer[i,]))
         {
-          seTemp <- c(seTemp,paste("(",round(seG[i,j],3),")",sep=""))
-          tvalTemp <- c(tvalTemp,paste("[",round(tvalsG[i,j],2),"]",sep=""))
+          seTemp <- c(seTemp,paste("(",format(round(seG[i,j],3),nsmall=3),")",sep=""))
+          tvalTemp <- c(tvalTemp,paste("[",format(round(tvalsG[i,j],2),nsmall=2),"]",sep=""))
         }
-        GAMMA <- rbind(Gammer[i,],seTemp,tvalTemp)
+        GAMMA <- rbind(format(Gammer[i,],nsmall=roundto),seTemp,tvalTemp)
         rownames(GAMMA) <- c(rownames(Gammer)[i],"(Std.Err.)","[t-Value]")
         print(as.data.frame(GAMMA))
       }
       cat("\n")
     }
+    if (object$ex>0)
+    {
+      Psis <- NULL
+      sePs <- NULL
+      tvalsPs <- NULL
+      pvalsPs <- NULL
+      cat("Psi:\n")
+      for (i in 1:length(object$Psi))
+      {        
+        colnames(Psi[[i]])[1] <- paste("        ",colnames(Psi[[i]])[1])
+        Psis <- cbind(Psis,round(Psi[[i]],roundto))
+        sePs <- cbind(sePs,round(object$se$Psi[[i]],roundto))
+        tvalsPs <- cbind(tvalsPs,round(object$tvals$Psi[[i]],roundto))
+        pvlasPs <- cbind(pvalsPs,round(object$pvals$Psi[[i]],roundto))
+      }
+      for (i in 1:object$n)
+      {
+        seTemp <- NULL
+        tvalTemp <- NULL
+        for (j in 1:length(Psis[i,]))
+        {
+          seTemp <- c(seTemp,paste("(",format(round(sePs[i,j],3),nsmall=3),")",sep=""))
+          tvalTemp <- c(tvalTemp,paste("[",format(round(tvalsPs[i,j],2),nsmall=2),"]",sep=""))
+        }
+        PSI <- rbind(format(Psis[i,],nsmall=roundto),seTemp,tvalTemp)
+        rownames(PSI) <- c(rownames(Psis)[i],"(Std.Err.)","[t-Value]")
+        print(as.data.frame(PSI))
+      }
+      cat("\n")
+    }
     if (!is.null(object$mu0) || !is.null(object$mu1))
     { 
-      cat("Intercept (and Trend) in VAR:\n")
+      cat("Intercept (and Trend) in VECM:\n")
       if (object$case=="H(r)")
       {
         seC <- cbind(object$se$mu0,object$se$mu1)
@@ -122,8 +158,8 @@ summary.vecm <- function(object, ...)
         {
           for (j in 1:n.case)
           {
-            seTemp <- c(seTemp,paste("(",round(seC[i,j],3),")",sep=""))
-            tvalTemp <- c(tvalTemp,paste("[",round(tvalC[i,j],2),"]",sep=""))
+            seTemp <- c(seTemp,paste("(",format(round(seC[i,j],3),nsmall=3),")",sep=""))
+            tvalTemp <- c(tvalTemp,paste("[",format(round(tvalC[i,j],2),nsmall=2),"]",sep=""))
           }
         }
         if (object$case=="H_1^*(r)" || object$case=="H^*(r)")
@@ -132,9 +168,9 @@ summary.vecm <- function(object, ...)
           tvalTemp <- c(tvalTemp,"-")
         } 
         
-        CONST <- rbind(const[i,],seTemp,tvalTemp)
+        CONST <- rbind(format(const[i,],nsmall=roundto),seTemp,tvalTemp)
         rownames(CONST) <- c(rownames(const)[i],"(Std.Err.)","[t-Value]")
-        colnames(CONST) <- colnames(const)
+        colnames(CONST) <- paste("   ",colnames(const),sep="")
         print(as.data.frame(CONST))
       }
       cat("\n")                            
@@ -149,12 +185,12 @@ summary.vecm <- function(object, ...)
         tvalTemp <- NULL
         for (j in 1:(object$season-1))
         {
-          seTemp <- c(seTemp,paste("(",round(object$se$season[i,j],3),")",sep=""))
-          tvalTemp <- c(tvalTemp,paste("[",round(object$tvals$season[i,j],2),"]",sep=""))
+          seTemp <- c(seTemp,paste("(",format(round(object$se$season[i,j],3),nsmall=3),")",sep=""))
+          tvalTemp <- c(tvalTemp,paste("[",format(round(object$tvals$season[i,j],2),nsmall=2),"]",sep=""))
         }
-        SEASON <- rbind(Phi[i,],seTemp,tvalTemp)
+        SEASON <- rbind(format(Phi[i,],nsmall=roundto),seTemp,tvalTemp)
         rownames(SEASON) <- c(rownames(object$se$season)[i],"(Std.Err.)","[t-Value]")
-        colnames(SEASON) <- colnames(Phi)
+        colnames(SEASON) <- paste("   ",colnames(Phi),sep="")
         print(as.data.frame(SEASON))
       }
       cat("\n")
@@ -186,7 +222,7 @@ summary.vecm <- function(object, ...)
     Psi <- object$Psi
     const <- cbind(object$c.0,object$c.1)
     nam <- vector()
-    if (!is.null(object$c.0)) {nam <- c(nam,"         Const")}
+    if (!is.null(object$c.0)) {nam <- c(nam,"       Const")}
     if (!is.null(object$c.1)) {nam <- c(nam,"Trend")}
     if (!is.null(const))
     {
@@ -211,30 +247,35 @@ summary.vecm <- function(object, ...)
 	if (!(object$r==object$n))
 	{
       cat("Beta':\n")
-      tvalsB <- round(object$tvals$beta,roundto)
-      l <- 0
+      if (object$r==1)
+      {
+        tvalsB <- matrix(round(object$tvals$beta,roundto),ncol=1)
+      } else {
+        tvalsB <- round(object$tvals$beta,roundto)
+      }
+      seB <- round(object$se$beta,roundto)
       for (i in 1:object$r)
       {
         temptB <- rep("-",object$r)
-        seTemp <- rep("-",object$r)
+        seTemp <- rep("-",object$r)        
         if (object$case=="II" || object$case=="IV")
         {
-      	  i.b <- object$m-object$r+1
+      	  i.b <- object$m-object$ex-object$r+1
         } else {
-      	  i.b <- object$m-object$r
+      	  i.b <- object$m-object$ex-object$r
         }
-        for (j in l+(1:i.b))
+        for (j in 1:i.b)
         {
-          temptB <- c(temptB,paste("[",round(tvalsB[j],2),"]",sep=""))        
+          seTemp <- c(seTemp,paste("(",format(round(seB[j,i],3),nsmall=3),")",sep=""))
+          temptB <- c(temptB,paste("[",format(round(tvalsB[j,i],2),nsmall=2),"]",sep=""))        
         }
-        seTemp <- c(seTemp,rep("NA",i.b))
-      
-        BETA <- rbind(beta[,i],seTemp,temptB)
+
+        BETA <- rbind(format(beta[,i],nsmall=roundto),seTemp,temptB)
         rownames(BETA) <- c(colnames(beta)[i],"(Std.Err.)","[t-Value]")
         print(as.data.frame(BETA))
-        l <- i*i.b
+        cat("\n")
       }
-      cat("\n")
+#      cat("\n")
 
       cat("Alpha:\n") 
       colnames(alpha)[1] <- paste("        ",colnames(alpha)[1])
@@ -252,10 +293,10 @@ summary.vecm <- function(object, ...)
       tvalTemp <- NULL
       for (j in 1:(dim(object$dat)[2]-object$n))
       {
-        seTemp <- c(seTemp,paste("(",round(seL[i,j],3),")",sep=""))
-        tvalTemp <- c(tvalTemp,paste("[",round(tvalsL[i,j],2),"]",sep=""))
+        seTemp <- c(seTemp,paste("(",format(round(seL[i,j],3),nsmall=3),")",sep=""))
+        tvalTemp <- c(tvalTemp,paste("[",format(round(tvalsL[i,j],2),nsmall=2),"]",sep=""))
       }
-      LAMBDA <- rbind(round(Lambda[i,],roundto),seTemp,tvalTemp)
+      LAMBDA <- rbind(format(round(Lambda[i,],roundto),nsmall=roundto),seTemp,tvalTemp)
       rownames(LAMBDA) <- c(rownames(Lambda)[i],"(Std.Err.)","[t-Value]")
       if (dim(Lambda)[2]<2){colnames(LAMBDA) <- colnames(Lambda)}
       print(as.data.frame(LAMBDA))
@@ -282,10 +323,10 @@ summary.vecm <- function(object, ...)
         tvalTemp <- NULL
         for (j in 1:length(tempPhi[i,]))
         {
-          seTemp <- c(seTemp,paste("(",round(sePh[i,j],3),")",sep=""))
-          tvalTemp <- c(tvalTemp,paste("[",round(tvalsPh[i,j],2),"]",sep=""))
+          seTemp <- c(seTemp,paste("(",format(round(sePh[i,j],3),nsmall=3),")",sep=""))
+          tvalTemp <- c(tvalTemp,paste("[",format(round(tvalsPh[i,j],2),nsmall=2),"]",sep=""))
         }
-        PHI <- rbind(tempPhi[i,],seTemp,tvalTemp)
+        PHI <- rbind(format(tempPhi[i,],nsmall=roundto),seTemp,tvalTemp)
         rownames(PHI) <- c(rownames(tempPhi)[i],"(Std.Err.)","[t-Value]")
         print(as.data.frame(PHI))
       }
@@ -312,10 +353,10 @@ summary.vecm <- function(object, ...)
         tvalTemp <- NULL
         for (j in 1:length(tempPsi[i,]))
         {
-          seTemp <- c(seTemp,paste("(",round(sePs[i,j],3),")",sep=""))
-          tvalTemp <- c(tvalTemp,paste("[",round(tvalsPs[i,j],2),"]",sep=""))
+          seTemp <- c(seTemp,paste("(",format(round(sePs[i,j],3),nsmall=3),")",sep=""))
+          tvalTemp <- c(tvalTemp,paste("[",format(round(tvalsPs[i,j],2),nsmall=2),"]",sep=""))
         }
-        PSI <- rbind(tempPsi[i,],seTemp,tvalTemp)
+        PSI <- rbind(format(tempPsi[i,],nsmall=roundto),seTemp,tvalTemp)
         rownames(PSI) <- c(rownames(tempPsi)[i],"(Std.Err.)","[t-Value]")
         if (dim(Psi[[1]])[2]<2){colnames(PSI) <- colnames(Psi[[1]])}
         print(as.data.frame(PSI))
@@ -325,7 +366,7 @@ summary.vecm <- function(object, ...)
 
     if (!is.null(object$c.0) || !is.null(object$c.1))
     { 
-      cat("Intercept (and Trend) in VAR:\n")
+      cat("Intercept (and Trend) in VECM:\n")
       if (object$case=="V")
       {
         seC <- cbind(object$se$c.0,object$se$c.1)
@@ -350,8 +391,8 @@ summary.vecm <- function(object, ...)
         {
           for (j in 1:n.case)
           {
-            seTemp <- c(seTemp,paste("(",round(seC[i,j],3),")",sep=""))
-            tvalTemp <- c(tvalTemp,paste("[",round(tvalC[i,j],2),"]",sep=""))
+            seTemp <- c(seTemp,paste("(",format(round(seC[i,j],3),nsmall=3),")",sep=""))
+            tvalTemp <- c(tvalTemp,paste("[",format(round(tvalC[i,j],2),nsmall=2),"]",sep=""))
           }
         }
         if (object$case=="II" || object$case=="IV")
@@ -359,9 +400,9 @@ summary.vecm <- function(object, ...)
           seTemp <- c(seTemp,"-")
           tvalTemp <- c(tvalTemp,"-")
         } 
-        CONST <- rbind(const[i,],seTemp,tvalTemp)
+        CONST <- rbind(format(const[i,],nsmall=roundto),seTemp,tvalTemp)
         rownames(CONST) <- c(rownames(const)[i],"(Std.Err.)","[t-Value]")
-        colnames(CONST) <- colnames(const)
+        colnames(CONST) <- paste("    ",colnames(const),sep="")
         print(as.data.frame(CONST))
       }
       cat("\n")                            
