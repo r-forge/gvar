@@ -1,10 +1,10 @@
 \name{summary.vecm}
 \alias{summary.vecm}
-\title{Summary statistics for VECM objects}
+\title{Summarizing objects of class vecm}
 \description{\code{summary.vecm} plots summary statistics for objects of class \code{vecm} 
 }
 \usage{
-summary.vecm(object, ...)
+\method{summary}{vecm}(object, ...)
 }
 
 \arguments{
@@ -37,11 +37,7 @@ summary.vecm(object, ...)
   p <-  4
   freq <- 4
   etw <- list(start = 1972.25+p*1/freq, end= 1998.75, freq = freq)
-  case <- "III"
-  r <- 1
-  season <- 4
-  season.start.time <- 1
-  res <- est.vecm.mdls(RDp,etw,p,case,r,season,season.start.time)
+  res <- est.vecm.mdls(RDp,etw=etw,p=4,case="III",r=1,season=4,season.start.time=1)
   summary(res)
 }
 

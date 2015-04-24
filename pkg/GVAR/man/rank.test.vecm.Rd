@@ -14,10 +14,10 @@ rank.test.we(z.ts, etw, p, q = p, n, ex, lex, case)
   \item{Y.ts,z.ts}{time series data matrix}
   \item{etw}{estimation time window, a list of the form \code{list(start=,end=,freq=)}}
   \item{p}{lag order of the endogenous variables}
-  \item{q}{lag order of the weakly exogenous variables, is set to \code{q=p} by default}
+  \item{q}{lag order of the (weakly) exogenous variables, is set to \code{q=p} by default}
   \item{n}{number of endogenous variables}
   \item{ex}{number of exogenous variables}
-  \item{lex}{lag order of endogenous variables}
+  \item{lex}{lag order of the strictly exogenous variables}
   \item{case}{intercept and trend options from \code{"I"} to \code{"V"}, where case \code{"I"} is a zero intercept, zero trend model, case \code{"II"} is a restricted intercept, zero trend model, \code{"III"} is a unrestricted intercept, zero trend model, \code{"IV"} is a unrestricted intercept restricted trend model and \code{"V"} is a unrestricted intercept, unrestricted trend model}
   \item{season}{optional seasonal dummies, default value is \code{NULL}}
   \item{season.start.time}{optional dummy start time, default value is \code{NULL}}

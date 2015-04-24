@@ -1,5 +1,4 @@
-\name{cv.tables.pesaran}
-\alias{CV.trace.table}
+\name{CV.trace.table}
 \alias{CV.maxeigen.table}
 \docType{data}
 \title{Estimates of critical values of the limiting distributions of the cointegrating rank statistics in a VECM with weakly exogenous I(1) variables}
@@ -35,7 +34,8 @@ Lists of 10
 }
 
 \examples{
-data(cv.tables.pesaran)
+data(CV.trace.table)
+data(CV.maxeigen.table)
 
 CV.trace.table[[1]][12,1]         ## returns the 0.05 trace CV for case I in a ... model
 CV.maxeigen.table[[4]][12,1]      ## returns the 0.1 maximum eigenvalue CV for case II in a ... model
